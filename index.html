@@ -480,4 +480,330 @@
     raw = raw.toUpperCase().replace(/0N/g, "ON").replace(/0E/g, "OE").replace(/0M/g, "OM");
     let weekType = "ALL";
     if (raw.includes("單週") && !raw.includes("雙週")) weekType = "ODD";
-    else if (raw
+    else if (raw.includes("雙週") && !raw.includes("單週")) weekType = "EVEN";
+    let cleanRaw = raw.replace(/-[\u4e00-\u9fa5]+/g, ""); 
+    const regex = /([\u4e00-\u9fa5])\s*\(([^)]+)\)/g;
+    let results = [], match;
+    while ((match = regex.exec(cleanRaw)) !== null) {
+      let weekdayIndex = WEEKDAY_MAP[match[1]];
+      let periods = match[2].split(',').map(p => {
+          let s = p.trim();
+          if (/^\d$/.test(s)) return '0' + s; 
+          if (s === 'E' || s === '0E') return 'OE';
+          if (s === 'N' || s === '0N') return 'ON';
+          if (s === 'M' || s === '0M') return 'OM';
+          return s;
+      }).filter(p => p);
+      if (weekdayIndex && periods.length > 0) results.push({ weekdayIndex, periods, weekType });
+    }
+    return results;
+  }
+
+  function refreshTimetableUI() {
+    document.querySelectorAll("td[id^='cell-']").forEach(td => td.innerHTML = "");
+    let hasConflictAlert = false;
+    let gridMap = {};
+
+    mySchedule.forEach(course => {
+      let timeSegments = [];
+      if (course.parsed) {
+          if (Array.isArray(course.parsed)) timeSegments = course.parsed;
+          else if (typeof course.parsed === 'object') timeSegments = [course.parsed]; 
+      }
+      timeSegments.forEach(seg => {
+        let type = seg.weekType || "ALL";
+        seg.periods.forEach(p => {
+            let key = `${seg.weekdayIndex}-${p}`;
+            if (!gridMap[key]) gridMap[key] = [];
+            gridMap[key].push({ course, type });
+        });
+      });
+    });
+
+    for (const [key, items] of Object.entries(gridMap)) {
+        let cell = document.getElementById(`cell-${key}`);
+        if (!cell) continue;
+        let isConflict = false;
+        if (items.length > 1) {
+            if (items.length === 2) {
+                let t1 = items[0].type, t2 = items[1].type;
+                if (!((t1 === "ODD" && t2 === "EVEN") || (t1 === "EVEN" && t2 === "ODD"))) isConflict = true;
+            } else isConflict = true;
+        }
+        if (isConflict) hasConflictAlert = true;
+
+        items.forEach(item => {
+            let course = item.course;
+            let row = course.fullData;
+            if(!row) return; 
+            let idSafe = String(course.id);
+            let isGeneral = String(row[COL.CATEGORY]).includes("通識");
+            let isRequired = String(row[COL.TYPE]).includes("必");
+            let colorClass = isGeneral ? "type-general" : (isRequired ? "type-required" : "type-elective");
+            if (isConflict) colorClass = "status-conflict";
+            let typeChar = isRequired ? "必" : "選";
+            let badgeHtml = `<span class="type-badge">${typeChar}</span>`;
+            let weekBadge = "";
+            if (item.type === "ODD") weekBadge = `<span class="week-badge">單週</span>`;
+            if (item.type === "EVEN") weekBadge = `<span class="week-badge" style="background-color:#e83e8c">雙週</span>`;
+
+            cell.innerHTML += `<div class="course-cell ${colorClass}" onclick="showCourseDetails('${idSafe}')"><div class="btn-delete" onclick="event.stopPropagation(); removeCourse('${idSafe}')"><i class="bi bi-trash3-fill"></i></div><div class="cell-class text-truncate">${row[COL.CLASS]}</div><div class="cell-title text-truncate">${weekBadge}${badgeHtml}${row[COL.NAME]}</div><div class="cell-teacher text-truncate"><i class="bi bi-person-fill" style="font-size:0.7rem;"></i> ${row[COL.TEACHER]}</div><div class="cell-room text-truncate"><i class="bi bi-geo-alt-fill" style="font-size:0.6rem;"></i> ${row[COL.ROOM] || "未定"}</div></div>`;
+        });
+    }
+    document.getElementById("conflictAlert").style.display = hasConflictAlert ? "block" : "none";
+  }
+
+  function addToSchedule(idStr) {
+    const id = String(idStr);
+    let row = currentSemData.find(r => String(r[COL.ID]) === id);
+    if(!row) { alert("系統錯誤：找不到該課程資料"); return; }
+    if (mySchedule.some(c => String(c.id) === id)) { existModal.show(); return; }
+    let parsed = parseCourseTime(row[COL.TIME]);
+    mySchedule.push({ id, name: row[COL.NAME], time: row[COL.TIME], parsed, fullData: row });
+    isDirty = true;
+    if (parsed.length > 0) { refreshTimetableUI(); toastEl.show(); } else { noTimeModal.show(); }
+  }
+
+  function openListModal() {
+    let tbody = document.getElementById("listModalBody");
+    tbody.innerHTML = "";
+    let total = 0;
+    if (mySchedule.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">尚未加入任何課程</td></tr>';
+    } else {
+        mySchedule.forEach(c => {
+            let r = c.fullData;
+            if(!r) return;
+            let credit = parseFloat(r[COL.CREDIT]) || 0;
+            total += credit;
+            let idSafe = String(c.id);
+            tbody.innerHTML += `<tr><td><span class="badge bg-secondary">${String(r[COL.ID]).padStart(4,'0')}</span></td><td class="fw-bold">${r[COL.NAME]}</td><td>${r[COL.TEACHER]}</td><td class="small text-muted">${r[COL.TIME]}</td><td><span class="fw-bold text-primary">${credit}</span></td><td><button class="btn btn-outline-danger btn-sm" onclick="listRemove('${idSafe}')"><i class="bi bi-trash3"></i></button></td></tr>`;
+        });
+    }
+    document.getElementById("listTotalCredit").innerText = total;
+    listModal.show();
+  }
+  function listRemove(id) { courseToRemoveId = id; removeModal.show(); }
+  function confirmRemove() {
+    if (courseToRemoveId) {
+      mySchedule = mySchedule.filter(c => String(c.id) !== String(courseToRemoveId));
+      refreshTimetableUI();
+      if (document.getElementById('listModal').classList.contains('show')) openListModal();
+      courseToRemoveId = null;
+      isDirty = true;
+    }
+    removeModal.hide();
+  }
+  
+  // 優化列印清單介面
+  function printList() {
+    let content = `
+      <html><head><title>已選課程清單</title>
+      <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 20px; color: #333; }
+        h2 { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px 8px; text-align: left; }
+        th { background: #f8f9fa; color: #000; font-weight: bold; border-bottom: 2px solid #ccc; }
+        tr:nth-child(even) { background-color: #fcfcfc; }
+        .total-row { background: #eee; font-weight: bold; font-size: 1.1em; }
+        .text-right { text-align: right; }
+      </style>
+      </head><body>
+      <h2>${document.getElementById("scheduleTitle").innerText} - 選課清單</h2>
+      <table><thead><tr><th>代碼</th><th>課程名稱</th><th>教師</th><th>時間</th><th>學分</th></tr></thead><tbody>`;
+    
+    let total = 0;
+    mySchedule.forEach(c => { 
+        let r = c.fullData; if(!r) return; 
+        let credit = parseFloat(r[COL.CREDIT]) || 0; total += credit; 
+        content += `<tr><td>${String(r[COL.ID]).padStart(4,'0')}</td><td><b>${r[COL.NAME]}</b></td><td>${r[COL.TEACHER]}</td><td>${r[COL.TIME]}</td><td>${credit}</td></tr>`; 
+    });
+    content += `</tbody><tfoot><tr class="total-row"><td colspan="4" class="text-right">總學分</td><td>${total}</td></tr></tfoot></table>
+      <div style="text-align: center; font-size: 0.8rem; color: #666; margin-top: 30px;">印出時間: ${new Date().toLocaleString()}</div>
+      </body></html>`;
+    let win = window.open('', '', 'height=600,width=800'); win.document.write(content); win.document.close(); win.print();
+  }
+  function removeCourse(id) { courseToRemoveId = id; removeModal.show(); }
+  function openClearModal() { clearModal.show(); }
+  
+  async function confirmClear() { 
+    if (!currentUserId) { loginModal.show(); return; } 
+    refreshSession(); 
+    mySchedule = []; 
+    refreshTimetableUI(); 
+    clearModal.hide(); 
+    await saveToBackend(true); 
+  }
+  
+  async function saveSchedule() { 
+    if (!currentUserId) { loginModal.show(); return; } 
+    refreshSession(); 
+    await saveToBackend(true); 
+  }
+  
+  async function saveToBackend(showSuccess = false) {
+    document.getElementById("loadingOverlay").style.display = 'flex';
+    const sem = currentSemesterVal;
+    try {
+      const res = await apiCall('saveUserSchedule', { semester: sem, json: JSON.stringify(mySchedule), email: currentUserId });
+      if(res.status === "success") {
+        userSchedules[sem] = mySchedule;
+        isDirty = false;
+        if(showSuccess) successModal.show();
+        if(pendingSemester) { 
+            document.getElementById("globalSemester").value = pendingSemester; 
+            changeSemester(pendingSemester); 
+            pendingSemester = null; 
+        }
+      } else alert(res.msg);
+    } catch(err) {
+      alert("儲存失敗：" + err);
+    } finally {
+      document.getElementById("loadingOverlay").style.display = 'none';
+    }
+  }
+  
+  function printSchedule() { window.print(); }
+  function refreshSession() { if (currentUserId) { localStorage.setItem("schedule_uid", currentUserId); localStorage.setItem("schedule_last_active", Date.now()); } }
+  
+  function updateScheduleTitle(sem, userEmail) {
+      document.getElementById("scheduleTitle").innerText = formatSemesterTitle(sem);
+      document.getElementById("scheduleTitle").setAttribute("data-user", userEmail || "未登入");
+  }
+  
+  function formatSemesterTitle(sem) { if (sem && sem.includes("-")) { let parts = sem.split("-"); let termChi = parts[1] == "1" ? "第一" : (parts[1] == "2" ? "第二" : parts[1]); return `${parts[0]}學年度${termChi}學期 預排課表`; } return sem + " 課表"; }
+  
+  function updateFilterOptions() {
+    let classes = [...new Set(currentSemData.map(r => r[COL.CLASS]))].sort(); document.getElementById("classOptions").innerHTML = classes.map(c => `<option value="${c}">`).join('');
+    let depts = [...new Set(currentSemData.map(r => r[COL.DEPT]))].sort(); document.getElementById("deptOptions").innerHTML = depts.map(d => `<option value="${d}">`).join('');
+  }
+  
+  function filterCourses() {
+    const key = document.getElementById("keyword").value.toLowerCase();
+    const classVal = document.getElementById("classInput").value;
+    const deptVal = document.getElementById("deptInput").value;
+    const listDiv = document.getElementById("courseList");
+    let count = 0;
+    let html = '<div class="list-group list-group-flush">';
+    for (let row of currentSemData) {
+      if (count >= 50) break;
+      let matchKey = !key || `${row[COL.NAME]} ${row[COL.TEACHER]} ${row[COL.SYS]} ${row[COL.ID]}`.toLowerCase().includes(key);
+      let matchClass = !classVal || String(row[COL.CLASS]).includes(classVal);
+      let matchDept = !deptVal || String(row[COL.DEPT]).includes(deptVal);
+      if (matchKey && matchClass && matchDept) {
+        let idSafe = String(row[COL.ID]);
+        let displayId = idSafe.padStart(4, '0');
+        let isRequired = String(row[COL.TYPE]).includes("必");
+        let typeBadge = isRequired ? '<span class="badge bg-primary me-1">必</span>' : '<span class="badge bg-secondary me-1">選</span>';
+        let roomIcon = row[COL.ROOM] ? `<span class="ms-2"><i class="bi bi-geo-alt"></i> ${row[COL.ROOM]}</span>` : '';
+        html += `<div class="list-group-item course-list-item d-flex justify-content-between align-items-center p-2"><div style="flex-grow: 1;"><div class="fw-bold text-dark mb-1">${typeBadge} ${row[COL.NAME]}</div><div class="text-muted" style="font-size: 0.8rem;"><span class="badge bg-light text-dark border me-1">${displayId}</span><span>${row[COL.CLASS]}</span> | <span>${row[COL.TEACHER]}</span><div class="mt-1"><i class="bi bi-clock"></i> ${row[COL.TIME]} ${roomIcon}</div></div></div><button class="btn btn-sm btn-light border ms-2 shadow-sm text-primary fw-bold" onclick="addToSchedule('${idSafe}')"><i class="bi bi-plus-lg"></i></button></div>`;
+        count++;
+      }
+    }
+    if (count === 0) listDiv.innerHTML = '<div class="p-4 text-center text-muted">查無符合課程</div>';
+    else listDiv.innerHTML = html + '</div>';
+  }
+  
+  function clearFilters() {
+    document.getElementById("keyword").value = "";
+    document.getElementById("classInput").value = "";
+    document.getElementById("deptInput").value = "";
+    filterCourses();
+  }
+  
+  function renderTimetableGrid() {
+    const tbody = document.getElementById("timetableBody");
+    let html = "";
+    PERIODS.forEach(p => {
+      html += `<tr><td class="period-col"><div class="mt-1">${p}</div><div style="font-size:0.7em;font-weight:normal;">${PERIOD_MAP[p].split('-')[0]}</div><div style="font-size:0.7em;font-weight:normal;">${PERIOD_MAP[p].split('-')[1]}</div></td>`;
+      for (let d = 1; d <= 7; d++) html += `<td id="cell-${d}-${p}"></td>`;
+      html += `</tr>`;
+    });
+    tbody.innerHTML = html;
+  }
+  
+  function showCourseDetails(id) {
+    const c = mySchedule.find(x => String(x.id) === String(id)); if(!c) return; const r = c.fullData;
+    document.getElementById("modalCourseTitle").innerText = r[COL.NAME];
+    let html = `<tr><th width="30%">學期</th><td>${r[COL.SEM]}</td></tr><tr><th>代碼</th><td>${String(r[COL.ID]).padStart(4,'0')}</td></tr><tr><th>教師</th><td>${r[COL.TEACHER]}</td></tr><tr><th>班級</th><td>${r[COL.CLASS]}</td></tr><tr><th>選別</th><td>${r[COL.TYPE]}</td></tr><tr><th>修別</th><td>${r[COL.CATEGORY]}</td></tr><tr><th>時間</th><td>${r[COL.TIME]}</td></tr><tr><th>教室</th><td>${r[COL.ROOM]}</td></tr><tr><th>學分</th><td>${r[COL.CREDIT]}</td></tr><tr><th>備註</th><td class="text-danger">${r[COL.NOTE] || ""}</td></tr>`;
+    document.getElementById("modalBody").innerHTML = html;
+    courseModal.show();
+  }
+  
+  function openCreditModal() {
+    let total = 0; mySchedule.forEach(c => { let r = c.fullData; if(r) { let credit = parseFloat(r[COL.CREDIT]); if(!isNaN(credit)) total += credit; }});
+    document.getElementById("currentCreditDisplay").innerText = total; checkCredits(total); creditModal.show();
+  }
+  
+  function checkCredits(currentTotal) {
+    if(currentTotal === undefined) currentTotal = parseFloat(document.getElementById("currentCreditDisplay").innerText);
+    let grade = document.getElementById("creditGradeSelect").value; let ruleText = "", isValid = true;
+    if (grade == "1") { ruleText = "學分下限: 15 / 上限: 27"; if (currentTotal < 15 || currentTotal > 27) isValid = false; }
+    else if (grade == "2" || grade == "3") { ruleText = "學分下限: 15 (無上限)"; if (currentTotal < 15) isValid = false; }
+    else if (grade == "4") { ruleText = "至少修習一門課程"; if (mySchedule.length === 0) isValid = false; }
+    document.getElementById("creditRuleText").innerText = ruleText;
+    let alertBox = document.getElementById("creditAlert"); if (!isValid) alertBox.classList.remove("d-none"); else alertBox.classList.add("d-none");
+  }
+  
+  // === 新生/舊生時程表過濾邏輯 ===
+  function openInfoModal() {
+    const sem = document.getElementById("globalSemester").value; 
+    document.getElementById("infoModalTitle").innerText = formatSemesterTitle(sem, false) + " 選課時程";
+    
+    currentSchedulesForModal = schedules.filter(item => item.semester === sem);
+    
+    // 檢查是否有包含新生或舊生關鍵字，決定是否顯示按鈕
+    const hasNewOrOld = currentSchedulesForModal.some(i => i.title.includes('新生') || i.title.includes('舊生'));
+    const filterGroup = document.getElementById('scheduleFilterGroup');
+    
+    if (hasNewOrOld) {
+        filterGroup.style.setProperty('display', 'flex', 'important');
+        document.getElementById('schedAll').checked = true;
+        renderScheduleCards('ALL');
+    } else {
+        filterGroup.style.setProperty('display', 'none', 'important');
+        renderScheduleCards('ALL');
+    }
+    
+    infoModal.show();
+  }
+
+  function renderScheduleCards(filterType) {
+    const container = document.getElementById("infoModalBody"); 
+    if(!currentSchedulesForModal || currentSchedulesForModal.length === 0) { 
+        container.innerHTML = '<div class="col-12 text-center text-muted py-3">本學期尚無選課公告</div>'; 
+        return; 
+    }
+    
+    const now = new Date(); 
+    let html = "";
+    
+    currentSchedulesForModal.forEach(item => {
+      // 過濾邏輯
+      if (filterType === 'NEW' && item.title.includes('舊生') && !item.title.includes('新生')) return;
+      if (filterType === 'OLD' && item.title.includes('新生') && !item.title.includes('舊生')) return;
+
+      let startTime = new Date(item.startISO); let endTime = new Date(item.endISO); let statusClass = "", badgeHtml = "";
+      if (now >= startTime && now <= endTime) { statusClass = "active"; badgeHtml = '<div class="status-badge">進行中</div>'; }
+      else if (now > endTime) { statusClass = "past"; badgeHtml = '<div class="status-badge">已結束</div>'; }
+      
+      let stepsHtml = '<ul class="step-list">'; 
+      item.steps.split('\n').forEach((step, index) => { 
+          if(step.trim()) stepsHtml += `<li class="step-item">${step.replace(/^\d+\.\s*/, '')}</li>`; 
+      }); 
+      stepsHtml += '</ul>';
+      
+      html += `<div class="col-md-6"><div class="schedule-card p-4 ${statusClass} text-${item.theme}">${badgeHtml}<h5 class="card-title fw-bold text-dark">${item.title}</h5><div class="schedule-date">${item.dateRange}</div>${stepsHtml}</div></div>`;
+    });
+    
+    if (html === "") {
+        container.innerHTML = `<div class="col-12 text-center text-muted py-3">查無符合條件的時程</div>`;
+    } else {
+        container.innerHTML = html; 
+    }
+  }
+</script>
+
+</body>
+</html>
