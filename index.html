@@ -1,89 +1,133 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>課表預排系統</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
   
   <style>
-    /* === 1. Layout === */
-    html, body { height: 100%; margin: 0; padding: 0; }
-    body { font-family: "Microsoft JhengHei", "Heiti TC", sans-serif; background-color: #f8f9fa; display: flex; flex-direction: column; }
-    .main-content { flex: 1 0 auto; padding-bottom: 20px; height: auto; overflow: visible; }
-    .h-100-card { height: auto; } .card-body-flex { height: auto; } .desktop-h-100 { height: auto; }
-    #courseList { max-height: 400px; overflow-y: auto; border-top: 1px solid #eee; margin-top: 10px; }
-    .timetable-wrapper { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow-x: auto; margin-top: 20px; min-height: 300px; }
-
-    /* === 2. Desktop === */
-    @media (min-width: 768px) {
-      html, body { height: 100%; overflow: hidden; }
-      .main-content { flex: 1; height: 100%; overflow: hidden; padding-bottom: 10px; }
-      .desktop-h-100 { height: 100%; display: flex; flex-direction: column; }
-      .filter-card { height: 100%; display: flex; flex-direction: column; margin-bottom: 0; }
-      .card-body-flex { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-      #courseList { flex: 1; max-height: none; }
-      .timetable-wrapper { height: 100%; overflow-y: auto; margin-top: 0; }
+    /* === 現代化基礎設計 === */
+    :root {
+      --primary-color: #4f46e5;
+      --primary-hover: #4338ca;
+      --bg-color: #f3f4f6;
+      --card-bg: #ffffff;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --border-color: #e5e7eb;
     }
 
-    /* === 3. Styles === */
-    .user-name-truncate { display: inline-block; vertical-align: bottom; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 5em; font-size: 0.9rem; }
-    @media (min-width: 768px) { .user-name-truncate { max-width: 150px; } }
-
-    .timetable { width: 100%; table-layout: fixed; border-collapse: collapse; min-width: 800px; }
-    .timetable th, .timetable td { border: 1px solid #dee2e6; text-align: center; vertical-align: middle; padding: 1px; height: 65px; }
-    .timetable th { background-color: #343a40; color: white; height: 40px; }
-    .period-col { width: 65px; background-color: #e9ecef; font-weight: bold; color: #495057; font-size: 0.9rem; position: sticky; left: 0; z-index: 5; }
+    html, body { height: 100%; margin: 0; padding: 0; }
+    body { 
+      font-family: 'Inter', 'Noto Sans TC', sans-serif; 
+      background-color: var(--bg-color); 
+      color: var(--text-main);
+      display: flex; flex-direction: column; 
+    }
     
-    .course-cell { border-radius: 4px; padding: 2px 4px; margin-bottom: 2px; line-height: 1.2; cursor: pointer; text-align: left; border-left: 4px solid; transition: transform 0.1s; }
-    .course-cell:hover { transform: scale(1.02); z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+    .navbar { background-color: #111827 !important; border-bottom: 1px solid #1f2937; }
+    .navbar-brand { font-weight: 700; letter-spacing: -0.5px; }
     
-    .type-required { background-color: #cfe2ff; color: #084298; border-left-color: #0d6efd; }
-    .type-elective { background-color: #e9ecef; color: #495057; border-left-color: #6c757d; }
-    .type-general { background-color: #fff3cd; color: #664d03; border-left-color: #ffc107; }
-    .status-conflict { background-color: #f8d7da !important; color: #842029 !important; border-left-color: #dc3545 !important; }
+    .main-content { flex: 1 0 auto; padding-bottom: 30px; height: auto; overflow: visible; padding-top: 20px; }
+    
+    /* 現代化卡片與陰影 */
+    .card, .timetable-wrapper, .modal-content { 
+      border: none; 
+      border-radius: 16px; 
+      background: var(--card-bg);
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); 
+    }
+    
+    .card-header { 
+      background-color: var(--card-bg) !important; 
+      color: var(--text-main) !important; 
+      border-bottom: 1px solid var(--border-color);
+      font-weight: 700;
+      border-radius: 16px 16px 0 0 !important;
+      padding: 1rem 1.25rem;
+    }
 
-    .cell-title { font-size: 0.85rem; font-weight: bold; margin-bottom: 1px;}
-    .cell-teacher { font-size: 0.75rem; opacity: 0.9; margin-bottom: 0px;}
+    .form-control, .form-select {
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+      font-size: 0.9rem;
+    }
+    .form-control:focus, .form-select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+
+    .btn { border-radius: 8px; font-weight: 500; padding: 0.5rem 1rem; transition: all 0.2s; }
+    .btn-primary { background-color: var(--primary-color); border-color: var(--primary-color); }
+    .btn-primary:hover { background-color: var(--primary-hover); border-color: var(--primary-hover); }
+
+    /* 課程列表設計 */
+    #courseList { overflow-y: auto; border-top: 1px solid var(--border-color); margin-top: 10px; }
+    .list-group-item { border-left: none; border-right: none; padding: 1rem 0.5rem; border-bottom: 1px solid var(--border-color); }
+    .list-group-item:last-child { border-bottom: none; }
+
+    /* 現代化課表網格 */
+    .timetable-wrapper { padding: 20px; overflow-x: auto; min-height: 300px; }
+    .timetable { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 0; min-width: 800px; border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; }
+    .timetable th, .timetable td { border: 1px solid var(--border-color); text-align: center; vertical-align: middle; padding: 2px; height: 75px; }
+    .timetable th { background-color: #f9fafb; color: #4b5563; height: 45px; font-weight: 600; font-size: 0.9rem; border-bottom: 2px solid var(--border-color); }
+    .period-col { width: 65px; background-color: #f9fafb; font-weight: 600; color: #6b7280; font-size: 0.85rem; position: sticky; left: 0; z-index: 5; }
+    
+    /* 課表方塊配色更新 (更柔和) */
+    .course-cell { border-radius: 6px; padding: 4px; margin-bottom: 3px; line-height: 1.25; cursor: pointer; text-align: left; border-left: 4px solid; transition: transform 0.15s ease, box-shadow 0.15s ease; position: relative; }
+    .course-cell:hover { transform: translateY(-2px); z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    
+    .type-required { background-color: #e0e7ff; color: #3730a3; border-left-color: #6366f1; }
+    .type-elective { background-color: #f3f4f6; color: #374151; border-left-color: #9ca3af; }
+    .type-general { background-color: #fef3c7; color: #92400e; border-left-color: #f59e0b; }
+    .status-conflict { background-color: #fee2e2 !important; color: #991b1b !important; border-left-color: #ef4444 !important; }
+
+    .cell-title { font-size: 0.85rem; font-weight: 700; margin-bottom: 2px; letter-spacing: -0.2px; }
+    .cell-teacher { font-size: 0.75rem; opacity: 0.85; margin-bottom: 0px;}
     .cell-room { font-size: 0.7rem; opacity: 0.7; }
-    .cell-class { font-size: 0.7rem; opacity: 0.8; margin-bottom: 1px; }
+    .cell-class { font-size: 0.7rem; opacity: 0.8; margin-bottom: 2px; }
     
-    .type-badge { font-size: 0.7rem; padding: 1px 3px; border-radius: 3px; margin-right: 4px; border: 1px solid rgba(0,0,0,0.1); background: rgba(255,255,255,0.6);}
-    .week-badge { font-size: 0.65rem; padding: 0px 2px; border-radius: 2px; margin-right: 3px; color: white; background-color: #6610f2; vertical-align: middle; }
+    .type-badge { font-size: 0.65rem; padding: 2px 4px; border-radius: 4px; margin-right: 4px; background: rgba(255,255,255,0.7); font-weight: 600; border: 1px solid rgba(0,0,0,0.05); }
+    .week-badge { font-size: 0.65rem; padding: 2px 4px; border-radius: 4px; margin-right: 4px; color: white; background-color: #8b5cf6; vertical-align: middle; font-weight: 600; }
 
-    .btn-delete { position: absolute; top: 1px; right: 1px; font-size: 10px; color: #dc3545; background: rgba(255,255,255,0.9); border-radius: 50%; width: 16px; height: 16px; line-height: 16px; text-align: center; display: none; z-index: 20; }
+    .btn-delete { position: absolute; top: 2px; right: 2px; font-size: 11px; color: #dc3545; background: rgba(255,255,255,0.95); border-radius: 50%; width: 18px; height: 18px; line-height: 18px; text-align: center; display: none; z-index: 20; border: 1px solid #fecaca; }
     .course-cell:hover .btn-delete { display: block; }
 
-    .schedule-card { border: 1px solid #eee; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); height: 100%; background: white; position: relative; overflow: hidden; }
-    .schedule-card.active { border: 2px solid #0d6efd; background-color: #f8fbff; }
-    .schedule-card.past { filter: grayscale(100%); opacity: 0.6; }
-    .schedule-date { font-size: 1.2rem; font-weight: 800; margin: 8px 0; letter-spacing: -0.5px; }
-    .step-list { padding: 0; margin-top: 10px; list-style: none; text-align: left; }
-    .step-item { padding-left: 5px; margin-bottom: 6px; color: #555; font-size: 0.85rem; }
-    .status-badge { position: absolute; top: 10px; right: 10px; font-size: 0.7rem; padding: 3px 6px; border-radius: 15px; font-weight: bold; display: none; }
-    .schedule-card.active .status-badge { display: inline-block; background: #e7f1ff; color: #0d6efd; }
-    .schedule-card.past .status-badge { display: inline-block; background: #eee; color: #777; }
+    .schedule-card { border: 1px solid var(--border-color); border-radius: 12px; box-shadow: none; height: 100%; background: white; position: relative; overflow: hidden; padding: 20px; }
+    .schedule-date { font-size: 1.1rem; font-weight: 700; margin: 10px 0; color: var(--text-main); }
+    .step-list { padding: 0; margin-top: 15px; list-style: none; text-align: left; }
+    .step-item { padding-left: 5px; margin-bottom: 8px; color: var(--text-muted); font-size: 0.9rem; }
+    .status-badge { position: absolute; top: 15px; right: 15px; font-size: 0.75rem; padding: 4px 8px; border-radius: 20px; font-weight: 700; }
+    .schedule-card.active { border-color: var(--primary-color); background-color: #f8fafc; }
+    .schedule-card.active .status-badge { background: #e0e7ff; color: var(--primary-color); }
+    .schedule-card.past { opacity: 0.7; }
+    .schedule-card.past .status-badge { background: #f3f4f6; color: #6b7280; }
 
-    .main-footer { padding: 10px; text-align: center; color: #6c757d; font-size: 0.75rem; border-top: 1px solid #e9ecef; background: #f8f9fa; flex-shrink: 0; }
-    .footer-link:hover { color: #0d6efd; }
-    #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.95); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-    #conflictAlert { display: none; font-size: 0.9rem; animation: fadeIn 0.5s; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .main-footer { padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.8rem; border-top: 1px solid var(--border-color); background: var(--bg-color); flex-shrink: 0; margin-top: auto; }
+    .footer-link { color: var(--text-muted); text-decoration: none; margin-left: 10px; transition: color 0.2s; }
+    .footer-link:hover { color: var(--primary-color); }
     
+    #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.9); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
+    
+    @media (min-width: 768px) {
+      .desktop-h-100, .filter-card, .card-body-flex { height: 100%; overflow: hidden; }
+      .timetable-wrapper { height: 100%; overflow-y: auto; margin-top: 0; }
+      #courseList { flex: 1; max-height: none; }
+    }
+
     @media print {
       .no-print { display: none !important; }
-      html, body { height: auto; overflow: visible; }
+      html, body { height: auto; overflow: visible; background: white; }
       .main-content { overflow: visible; padding: 0; }
       .timetable-wrapper { box-shadow: none; border: none; padding: 0; overflow: visible; height: auto; margin-top: 0; }
-      .timetable { min-width: auto; width: 100%; }
-      .timetable th { background-color: #ddd !important; color: black !important; -webkit-print-color-adjust: exact; padding: 2px; }
-      .timetable td { padding: 2px; height: auto; }
-      .course-cell { border: 1px solid #999; -webkit-print-color-adjust: exact; margin-bottom: 1px; padding: 1px 2px; }
-      #conflictAlert { display: block !important; border: 1px solid red; color: red; }
+      .timetable { min-width: auto; width: 100%; border: 1px solid #000; }
+      .timetable th { background-color: #f3f4f6 !important; color: black !important; -webkit-print-color-adjust: exact; padding: 2px; border: 1px solid #000; }
+      .timetable td { padding: 2px; height: auto; border: 1px solid #000; }
+      .course-cell { border: 1px solid #666; -webkit-print-color-adjust: exact; margin-bottom: 1px; padding: 2px; background: white !important; }
       .cell-class, .cell-teacher, .type-badge, .btn-delete { display: none !important; }
-      .cell-title { font-size: 0.8rem; margin-bottom: 0; line-height: 1.1; }
-      .cell-room { font-size: 0.7rem; font-style: italic; }
+      .cell-title { font-size: 0.8rem; margin-bottom: 0; line-height: 1.1; color: black; }
+      .cell-room { font-size: 0.7rem; color: #333; }
     }
   </style>
 </head>
@@ -91,44 +135,55 @@
 
 <div id="loadingOverlay">
   <div class="spinner-border text-primary" role="status"></div>
-  <h5 class="mt-3 text-secondary">系統載入中...</h5>
+  <h6 class="mt-3 text-secondary fw-bold">系統載入中</h6>
 </div>
 
-<div class="toast-container position-fixed bottom-0 end-0 p-3 no-print" style="z-index: 1060;"><div id="liveToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true"><div class="d-flex"><div class="toast-body"><i class="bi bi-check-circle-fill me-2"></i> 已加入課程</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div></div>
+<div class="toast-container position-fixed bottom-0 end-0 p-3 no-print" style="z-index: 1060;">
+  <div id="liveToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body fw-bold"><i class="bi bi-check-circle-fill me-2"></i> 已加入課程</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
 
-<div class="modal fade" id="creditModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header bg-dark text-white"><h5 class="modal-title"><i class="bi bi-calculator"></i> 學分試算</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body text-center p-4"><div class="mb-3"><label class="form-label fw-bold">請選擇您的年級</label><select class="form-select w-75 mx-auto" id="creditGradeSelect" onchange="checkCredits()"><option value="1">大一</option><option value="2">大二</option><option value="3">大三</option><option value="4">大四 (含延修生)</option></select></div><h1 class="display-4 fw-bold text-primary my-3" id="currentCreditDisplay">0</h1><p class="text-muted small" id="creditRuleText">學分下限: 15 / 上限: 27</p><div class="alert alert-danger d-none mt-3 text-start" id="creditAlert" style="font-size: 0.9rem;"><i class="bi bi-exclamation-triangle-fill me-1"></i> 學分未在規範內，選課前請務必再次確認，以免違反選課辦法而被勒令休學。</div></div><div class="modal-footer justify-content-center"><button type="button" class="btn btn-secondary btn-sm px-4" data-bs-dismiss="modal">關閉</button></div></div></div></div>
-<div class="modal fade" id="successModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header bg-success text-white"><h5 class="modal-title"><i class="bi bi-check-circle-fill"></i> 成功</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body text-center py-4"><h5 class="fw-bold" id="successMsgTitle">儲存成功</h5><p class="text-muted small mb-0">資料已同步至雲端資料庫</p></div><div class="modal-footer justify-content-center"><button type="button" class="btn btn-success btn-sm px-4" data-bs-dismiss="modal">確定</button></div></div></div></div>
-<div class="modal fade" id="existModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header bg-danger text-white"><h5 class="modal-title"><i class="bi bi-exclamation-circle-fill"></i> 課程已存在</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body text-center py-4"><h5 class="fw-bold mb-2">無法加入課程</h5><p class="text-muted small mb-0">這堂課已經在您的課表中囉！</p></div><div class="modal-footer justify-content-center"><button type="button" class="btn btn-secondary btn-sm px-4" data-bs-dismiss="modal">關閉</button></div></div></div></div>
-<div class="modal fade" id="clearModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header bg-danger text-white"><h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill"></i> 警告</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body text-center py-4"><h5 class="fw-bold mb-2">確定清空課表？</h5><p class="text-danger small mb-0"><i class="bi bi-info-circle"></i> 此動作將更新資料庫且<b>無法復原</b></p></div><div class="modal-footer justify-content-center"><button type="button" class="btn btn-secondary btn-sm me-2" data-bs-dismiss="modal">取消</button><button type="button" class="btn btn-danger btn-sm" onclick="confirmClear()">確定清空</button></div></div></div></div>
-<div class="modal fade" id="removeModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header bg-danger text-white"><h5 class="modal-title"><i class="bi bi-trash3-fill"></i> 移除課程</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body text-center py-4"><h5 class="fw-bold mb-2">確定移除此課程？</h5><p class="text-muted small mb-0">這堂課將從您的預排清單中刪除</p></div><div class="modal-footer justify-content-center"><button type="button" class="btn btn-secondary btn-sm me-2" data-bs-dismiss="modal">取消</button><button type="button" class="btn btn-danger btn-sm" onclick="confirmRemove()">移除</button></div></div></div></div>
+<div class="modal fade" id="creditModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header bg-dark text-white border-0"><h5 class="modal-title fw-bold"><i class="bi bi-calculator"></i> 學分試算</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body text-center p-4"><div class="mb-3"><label class="form-label fw-bold text-secondary">請選擇您的年級</label><select class="form-select w-75 mx-auto" id="creditGradeSelect" onchange="checkCredits()"><option value="1">大一</option><option value="2">大二</option><option value="3">大三</option><option value="4">大四 (含延修生)</option></select></div><h1 class="display-3 fw-bold text-primary my-3" id="currentCreditDisplay">0</h1><p class="text-muted small" id="creditRuleText">學分下限: 15 / 上限: 27</p><div class="alert alert-danger d-none mt-3 text-start border-0" id="creditAlert" style="font-size: 0.9rem; background-color: #fee2e2; color: #991b1b;"><i class="bi bi-exclamation-triangle-fill me-1"></i> 學分未在規範內，選課前請務必確認，以免違反選課辦法。</div></div><div class="modal-footer border-0 justify-content-center"><button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">關閉</button></div></div></div></div>
+<div class="modal fade" id="successModal" tabindex="-1"><div class="modal-dialog modal-sm modal-dialog-centered"><div class="modal-content"><div class="modal-body text-center py-4"><i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i><h5 class="fw-bold mt-3" id="successMsgTitle">儲存成功</h5><p class="text-muted small mb-3">資料已同步至雲端</p><button type="button" class="btn btn-success w-100" data-bs-dismiss="modal">確定</button></div></div></div></div>
+<div class="modal fade" id="existModal" tabindex="-1"><div class="modal-dialog modal-sm modal-dialog-centered"><div class="modal-content"><div class="modal-body text-center py-4"><i class="bi bi-exclamation-circle-fill text-danger" style="font-size: 3rem;"></i><h5 class="fw-bold mt-3">無法加入</h5><p class="text-muted small mb-3">這堂課已經在您的清單中</p><button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">關閉</button></div></div></div></div>
+<div class="modal fade" id="clearModal" tabindex="-1"><div class="modal-dialog modal-sm modal-dialog-centered"><div class="modal-content"><div class="modal-body text-center py-4"><i class="bi bi-trash3-fill text-danger" style="font-size: 3rem;"></i><h5 class="fw-bold mt-3">確定清空課表？</h5><p class="text-muted small mb-3">此動作將更新資料庫且無法復原</p><div class="d-flex gap-2"><button type="button" class="btn btn-light w-50" data-bs-dismiss="modal">取消</button><button type="button" class="btn btn-danger w-50" onclick="confirmClear()">確定清空</button></div></div></div></div></div>
+<div class="modal fade" id="removeModal" tabindex="-1"><div class="modal-dialog modal-sm modal-dialog-centered"><div class="modal-content"><div class="modal-body text-center py-4"><i class="bi bi-eraser-fill text-danger" style="font-size: 3rem;"></i><h5 class="fw-bold mt-3">移除課程</h5><p class="text-muted small mb-3">將從您的預排清單中刪除</p><div class="d-flex gap-2"><button type="button" class="btn btn-light w-50" data-bs-dismiss="modal">取消</button><button type="button" class="btn btn-danger w-50" onclick="confirmRemove()">移除</button></div></div></div></div></div>
 
 <div class="modal fade" id="loginModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="bi bi-person-circle"></i> 開始排課</h5></div>
-      <div class="modal-body">
-        <div class="alert alert-info border-0 small mb-3"><i class="bi bi-info-circle-fill me-1"></i> 歡迎來到預排系統！請輸入您的 <b>Email</b> 建立專屬課表，下次輸入一樣的資訊就能看到存檔囉。</div>
-        
-        <div class="alert alert-warning border-0 small mb-4">
-            <strong><i class="bi bi-megaphone-fill me-1"></i> 系統更新公告：</strong><br>
-            因系統轉移更新，並且刪除原系統識別碼欄位，若在原系統登入過者，可直接輸入原始帳號開始排課。若尚未在原系統登入過者，直接輸入您的電子郵件即可開始使用系統。
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header border-0 pb-0">
+        <h4 class="modal-title fw-bold text-dark w-100 text-center mt-3">登入系統</h4>
+      </div>
+      <div class="modal-body px-4 pb-4">
+        <div class="alert alert-warning border-0 small mb-4" style="background-color: #fffbeb; color: #92400e;">
+            <div class="fw-bold mb-1"><i class="bi bi-megaphone-fill me-1"></i> 系統更新公告</div>
+            因系統轉移更新，已移除原系統密碼欄位。若曾在舊版系統建立過課表，請直接輸入原始帳號繼續使用；新使用者輸入您的電子郵件即可開始排課。
         </div>
 
+        <p class="text-muted small text-center mb-4">請輸入您的 Email 建立專屬課表，下次輸入相同信箱即可載入存檔。</p>
+        
         <form onsubmit="event.preventDefault(); submitLogin();">
           <div class="mb-3">
-            <label class="form-label fw-bold">您的信箱</label>
-            <input type="text" id="loginId" class="form-control form-control-lg" placeholder="例如：example@gmail.com" required>
+            <label class="form-label fw-bold text-secondary small">您的信箱</label>
+            <input type="email" id="loginId" class="form-control form-control-lg bg-light" placeholder="name@example.com" required>
           </div>
-          <div class="d-grid mt-4"><button type="submit" id="loginBtn" class="btn btn-primary btn-lg fw-bold">進入我的課表</button></div>
+          <div class="d-grid mt-4">
+            <button type="submit" id="loginBtn" class="btn btn-primary btn-lg fw-bold shadow-sm">進入我的課表</button>
+          </div>
         </form>
-        <div id="loginError" class="text-danger mt-2 small text-center"></div>
+        <div id="loginError" class="text-danger mt-2 small text-center fw-bold"></div>
         
-        <div class="bg-light p-3 rounded mt-4 border">
-          <h6 class="fw-bold mb-2 small text-secondary"><i class="bi bi-shield-exclamation"></i> 免責聲明與使用規範</h6>
-          <ul class="list-unstyled mb-0" style="font-size: 0.75rem; color: #6c757d;">
-            <li class="mb-1">1. 本系統為個人開發之輔助工具，<b>非學校官方系統</b>，選課結果請以校務系統為準。</li>
-            <li class="mb-1">2. 課程資料僅供參考，若有異動請務必核對學校最新公告。</li>
-            <li>3. 使用本系統即代表您同意自行承擔相關風險，開發者不負資料保管與正確性之責任。</li>
+        <div class="bg-light p-3 rounded-3 mt-4 border border-light">
+          <h6 class="fw-bold mb-2 small text-secondary"><i class="bi bi-shield-check"></i> 服務條款與聲明</h6>
+          <ul class="list-unstyled mb-0 text-muted" style="font-size: 0.75rem;">
+            <li class="mb-1">1. 本系統為個人開發之輔助工具，非校方官方系統，選課結果請以校務系統為準。</li>
+            <li class="mb-1">2. 課程資訊僅供排課參考，若有異動依校方公告為主。</li>
+            <li>3. 使用本服務即代表您同意自行承擔相關風險，開發者不負資料正確性之擔保責任。</li>
           </ul>
         </div>
       </div>
@@ -136,75 +191,79 @@
   </div>
 </div>
 
-<div class="modal fade" id="infoModal" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title fw-bold" id="infoModalTitle">選課時程</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body bg-light"><div class="row g-3 justify-content-center" id="infoModalBody"></div><div class="text-center mt-4"><a href="https://academicntue.ntue.edu.tw/p/412-1002-485.php" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-4"><i class="bi bi-box-arrow-up-right"></i> 國北教大選課專區</a></div></div></div></div></div>
-<div class="modal fade" id="courseModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header bg-light"><h5 class="modal-title fw-bold" id="modalCourseTitle">課程資訊</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-0"><table class="table table-striped mb-0"><tbody id="modalBody"></tbody></table></div></div></div></div>
-<div class="modal fade" id="listModal" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"><div class="modal-content"><div class="modal-header bg-dark text-white"><h5 class="modal-title"><i class="bi bi-list-check"></i> 已選課程清單</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-0"><div class="alert alert-light border-bottom small mb-0 rounded-0 text-center text-muted"><i class="bi bi-info-circle"></i> 課程列表是由您新增課程的時間排序</div><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>代碼</th><th>名稱</th><th>教師</th><th>時間</th><th>學分</th><th>操作</th></tr></thead><tbody id="listModalBody"></tbody></table></div></div><div class="modal-footer"><button type="button" class="btn btn-outline-dark btn-sm me-auto" onclick="printList()"><i class="bi bi-printer"></i> 列印清單</button><div class="fw-bold text-primary">總學分: <span id="listTotalCredit">0</span></div><button type="button" class="btn btn-secondary btn-sm ms-2" data-bs-dismiss="modal">關閉</button></div></div></div></div>
-<div class="modal fade" id="noTimeModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header bg-warning text-dark"><h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill"></i> 注意</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body text-center py-4"><h5 class="fw-bold mb-2">已加入清單</h5><p class="text-muted small mb-0">但因課程無明確時間資訊或格式無法解析，故無法顯示於課表網格中。請至「已選清單」查看。</p></div><div class="modal-footer justify-content-center"><button type="button" class="btn btn-warning btn-sm px-4" data-bs-dismiss="modal">知道了</button></div></div></div></div>
-<div class="modal fade" id="unsavedModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header bg-warning text-dark"><h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill"></i> 尚未儲存</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body text-center py-4"><h5 class="fw-bold mb-2">您有未儲存的變更！</h5><p class="text-muted small mb-0">離開前是否要儲存目前的課表？</p></div><div class="modal-footer justify-content-center"><button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">取消</button><button type="button" class="btn btn-danger btn-sm" onclick="handleUnsavedLeave()">不儲存並離開</button><button type="button" class="btn btn-success btn-sm" onclick="handleUnsavedSave()">儲存並離開</button></div></div></div></div>
+<div class="modal fade" id="infoModal" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"><div class="modal-content"><div class="modal-header border-0"><h5 class="modal-title fw-bold" id="infoModalTitle">選課時程</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body bg-light"><div class="row g-3 justify-content-center" id="infoModalBody"></div><div class="text-center mt-4"><a href="https://academicntue.ntue.edu.tw/p/412-1002-485.php" target="_blank" class="btn btn-dark rounded-pill px-4 fw-bold"><i class="bi bi-box-arrow-up-right"></i> 國北教大選課專區</a></div></div></div></div></div>
+<div class="modal fade" id="courseModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header border-0 bg-light"><h5 class="modal-title fw-bold" id="modalCourseTitle">課程資訊</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-0"><table class="table table-striped mb-0"><tbody id="modalBody"></tbody></table></div></div></div></div>
+<div class="modal fade" id="listModal" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"><div class="modal-content"><div class="modal-header bg-dark text-white border-0"><h5 class="modal-title fw-bold"><i class="bi bi-list-check"></i> 已選課程清單</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-0"><div class="alert alert-light border-bottom small mb-0 rounded-0 text-center text-muted border-0"><i class="bi bi-info-circle"></i> 列表依加入時間排序</div><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>代碼</th><th>名稱</th><th>教師</th><th>時間</th><th>學分</th><th>操作</th></tr></thead><tbody id="listModalBody"></tbody></table></div></div><div class="modal-footer border-0 bg-light"><button type="button" class="btn btn-outline-dark btn-sm me-auto" onclick="printList()"><i class="bi bi-printer"></i> 列印清單</button><div class="fw-bold text-primary fs-5">總學分: <span id="listTotalCredit">0</span></div><button type="button" class="btn btn-secondary btn-sm ms-3 px-3" data-bs-dismiss="modal">關閉</button></div></div></div></div>
+<div class="modal fade" id="noTimeModal" tabindex="-1"><div class="modal-dialog modal-sm modal-dialog-centered"><div class="modal-content"><div class="modal-body text-center py-4"><i class="bi bi-info-circle-fill text-warning" style="font-size: 3rem;"></i><h5 class="fw-bold mt-3">已加入清單</h5><p class="text-muted small mb-3">此課程無時間資訊，請至清單中查看</p><button type="button" class="btn btn-warning text-dark fw-bold w-100" data-bs-dismiss="modal">知道了</button></div></div></div></div>
+<div class="modal fade" id="unsavedModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header bg-warning text-dark border-0"><h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> 尚未儲存</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body text-center py-4"><h5 class="fw-bold mb-2">您有未儲存的變更</h5><p class="text-muted small mb-0">離開前是否要儲存目前的課表？</p></div><div class="modal-footer border-0 justify-content-center bg-light"><button type="button" class="btn btn-light border" data-bs-dismiss="modal">取消</button><button type="button" class="btn btn-danger" onclick="handleUnsavedLeave()">不儲存離開</button><button type="button" class="btn btn-success px-4" onclick="handleUnsavedSave()">儲存</button></div></div></div></div>
 
-<nav class="navbar navbar-dark bg-dark mb-3 no-print flex-shrink-0">
-  <div class="container-fluid">
+<nav class="navbar navbar-dark bg-dark mb-3 no-print flex-shrink-0 shadow-sm">
+  <div class="container-fluid py-1">
     <div class="d-flex align-items-center">
-      <span class="navbar-brand mb-0 h1"><i class="bi bi-calendar-range"></i> 課表預排系統</span>
-      <span class="text-white-50 ms-3 d-none d-md-inline-block" style="font-size: 0.9rem;"><i class="bi bi-mortarboard"></i> 國立臺北教育大學</span>
-      <span class="text-white-50 ms-2 d-inline-block d-md-none" style="font-size: 0.9rem;"><i class="bi bi-mortarboard"></i> 國北教</span>
-      
-      <span class="text-white-50 ms-3 border-start ps-3 d-flex align-items-center" style="font-size: 0.9rem;">
-        <i class="bi bi-person-circle me-1"></i> <span id="currentUserDisplay" class="user-name-truncate">未登入</span>
-        <button class="btn btn-sm btn-link text-white-50 p-0 ms-2" onclick="logout()" title="登出帳號"><i class="bi bi-box-arrow-right"></i></button>
+      <span class="navbar-brand mb-0 h5"><i class="bi bi-calendar-range"></i> 課表預排系統</span>
+      <span class="text-white-50 ms-3 d-none d-md-inline-block small"><i class="bi bi-mortarboard"></i> 國立臺北教育大學</span>
+      <span class="text-white-50 ms-2 d-inline-block d-md-none small">國北教</span>
+      <span class="text-white-50 ms-3 border-start border-secondary ps-3 d-flex align-items-center small">
+        <i class="bi bi-person-circle me-1"></i> <span id="currentUserDisplay" class="user-name-truncate fw-bold text-white">未登入</span>
+        <button class="btn btn-sm btn-link text-white-50 p-0 ms-2 text-decoration-none" onclick="logout()" title="登出"><i class="bi bi-box-arrow-right"></i> 登出</button>
       </span>
     </div>
-    <div class="d-flex align-items-center">
-      <label class="text-white me-2 small">學期:</label>
-      <select id="globalSemester" class="form-select form-select-sm me-2" style="width: 120px;" onchange="onSemesterSelectChange()"></select>
-      <button class="btn btn-sm btn-outline-light" onclick="openInfoModal()" title="查看選課時程"><i class="bi bi-calendar-week"></i> <span class="d-inline">選課時程</span></button>
+    <div class="d-flex align-items-center mt-2 mt-sm-0">
+      <select id="globalSemester" class="form-select form-select-sm me-2 bg-dark text-white border-secondary" style="width: 130px;" onchange="onSemesterSelectChange()"></select>
+      <button class="btn btn-sm btn-outline-light" onclick="openInfoModal()" title="選課時程"><i class="bi bi-calendar-week"></i> <span class="d-none d-md-inline">時程</span></button>
     </div>
   </div>
 </nav>
 
 <div class="container-fluid main-content">
-  <div class="row desktop-h-100">
+  <div class="row desktop-h-100 g-3">
     <div class="col-md-3 desktop-h-100 no-print">
-      <div class="card shadow-sm h-100-card filter-card">
-        <div class="card-header bg-primary text-white flex-shrink-0"><i class="bi bi-search"></i> 課程篩選</div>
-        <div class="card-body p-2 card-body-flex">
+      <div class="card h-100-card filter-card">
+        <div class="card-header border-0"><i class="bi bi-search text-primary me-1"></i> 課程搜尋</div>
+        <div class="card-body p-3 card-body-flex bg-white rounded-bottom-4">
           <div class="mb-2 flex-shrink-0">
-            <label class="form-label small fw-bold mb-1">班級</label><input class="form-control form-control-sm mb-2" list="classOptions" id="classInput" placeholder="輸入或選擇..." onchange="filterCourses()"><datalist id="classOptions"></datalist>
-            <label class="form-label small fw-bold mb-1">系所</label><input class="form-control form-control-sm mb-2" list="deptOptions" id="deptInput" placeholder="輸入或選擇..." onchange="filterCourses()"><datalist id="deptOptions"></datalist>
-            <label class="form-label small fw-bold mb-1">關鍵字</label><input type="text" id="keyword" class="form-control form-control-sm" onkeyup="filterCourses()" placeholder="科目 / 老師 / 代碼...">
-            <button class="btn btn-sm btn-outline-secondary w-100 mt-2" onclick="clearFilters()">清除條件</button>
+            <div class="row g-2 mb-2">
+              <div class="col-6"><input class="form-control form-control-sm bg-light" list="classOptions" id="classInput" placeholder="班級..." onchange="filterCourses()"></div>
+              <div class="col-6"><input class="form-control form-control-sm bg-light" list="deptOptions" id="deptInput" placeholder="系所..." onchange="filterCourses()"></div>
+            </div>
+            <datalist id="classOptions"></datalist><datalist id="deptOptions"></datalist>
+            <input type="text" id="keyword" class="form-control form-control-sm mb-2 bg-light" onkeyup="filterCourses()" placeholder="輸入科目 / 老師 / 代碼...">
+            <button class="btn btn-sm btn-light border w-100 text-secondary fw-bold" onclick="clearFilters()"><i class="bi bi-arrow-counterclockwise"></i> 清除條件</button>
           </div>
-          <div id="courseList"></div>
+          <div id="courseList" class="pe-1"></div>
         </div>
       </div>
     </div>
     <div class="col-md-9 desktop-h-100">
-      <div class="timetable-wrapper">
-        <div class="d-flex justify-content-between align-items-center flex-wrap">
-          <h3 id="scheduleTitle" class="m-0 fw-bold text-dark me-2">我的課表</h3>
-          <div class="no-print mt-2 mt-md-0">
-             <button class="btn btn-sm btn-dark me-1" onclick="openListModal()"><i class="bi bi-list-check"></i> 已選清單</button>
-             <button class="btn btn-sm btn-dark me-1" onclick="openCreditModal()"><i class="bi bi-calculator"></i> 學分試算</button>
-             <button class="btn btn-sm btn-success me-1" onclick="saveSchedule()"><i class="bi bi-cloud-arrow-up-fill"></i> 儲存</button>
-             <button class="btn btn-sm btn-outline-dark me-1" onclick="printSchedule()"><i class="bi bi-printer-fill"></i> 列印</button>
-             <button class="btn btn-sm btn-outline-danger" onclick="openClearModal()"><i class="bi bi-trash3"></i> 清空</button>
+      <div class="timetable-wrapper bg-white">
+        <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+          <h4 id="scheduleTitle" class="m-0 fw-bold text-dark">我的課表</h4>
+          <div class="no-print mt-2 mt-md-0 d-flex gap-1">
+             <button class="btn btn-sm btn-dark" onclick="openListModal()"><i class="bi bi-list-check"></i> 清單</button>
+             <button class="btn btn-sm btn-dark" onclick="openCreditModal()"><i class="bi bi-calculator"></i> 試算</button>
+             <button class="btn btn-sm btn-primary px-3" onclick="saveSchedule()"><i class="bi bi-cloud-arrow-up-fill"></i> 儲存</button>
+             <button class="btn btn-sm btn-light border text-secondary" onclick="printSchedule()"><i class="bi bi-printer-fill"></i></button>
+             <button class="btn btn-sm btn-light border text-danger" onclick="openClearModal()"><i class="bi bi-trash3"></i></button>
           </div>
         </div>
-        <div id="conflictAlert" class="alert alert-danger py-2 mt-2 mb-2 shadow-sm"><i class="bi bi-exclamation-triangle-fill me-2"></i> <strong>目前有衝堂，選課時請務必注意！</strong></div>
-        <table class="timetable mt-2"><thead><tr><th class="period-col">節次</th><th>一</th><th>二</th><th>三</th><th>四</th><th>五</th><th>六</th><th>日</th></tr></thead><tbody id="timetableBody"></tbody></table>
+        <div id="conflictAlert" class="alert alert-danger py-2 mb-3 border-0 small fw-bold" style="background-color: #fee2e2; color: #991b1b;"><i class="bi bi-exclamation-triangle-fill me-2"></i> 目前有衝堂，請注意！</div>
+        <table class="timetable"><thead><tr><th class="period-col">節次</th><th>一</th><th>二</th><th>三</th><th>四</th><th>五</th><th>六</th><th>日</th></tr></thead><tbody id="timetableBody"></tbody></table>
       </div>
     </div>
   </div>
 </div>
 
-<footer class="main-footer no-print">Copyright &copy; D. All rights reserved. | <span id="footerInfo">Loading...</span><a href="mailto:xin.itts.1346@gmail.com" class="footer-link"><i class="bi bi-envelope"></i> 聯絡開發者</a></footer>
+<footer class="main-footer no-print">
+  <div class="mb-1 fw-bold text-dark">Copyright &copy; D. All rights reserved.</div>
+  <div class="small text-muted"><span id="footerInfo">Loading...</span> | <a href="mailto:xin.itts.1346@gmail.com" class="footer-link"><i class="bi bi-envelope"></i> 聯絡開發者</a></div>
+</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   // ==========================================
   // ⚠️ 這是 GitHub Pages 專用，請設定 API_URL
   // ==========================================
-  const API_URL = "https://script.google.com/macros/s/AKfycbw1tjPCIgpEXB0M5PhjHvGp3OhDu_INFtUFZbO8QvaPzNrOlqnTKXuQIWU25RIfHdWq/exec"; // <-- 貼上你的 GAS 部署網址
+  const API_URL = "https://script.google.com/macros/s/AKfycbw1tjPCIgpEXB0M5PhjHvGp3OhDu_INFtUFZbO8QvaPzNrOlqnTKXuQIWU25RIfHdWq/exec"; // <-- 請貼上您最新部署的網址
 
   async function apiCall(action, params = {}) {
     params.action = action; 
@@ -250,92 +309,87 @@
 
   async function initApp() {
     const savedId = localStorage.getItem("schedule_uid");
+    const lastTime = localStorage.getItem("schedule_last_active");
+    let isSessionValid = (savedId && lastTime && (Date.now() - parseInt(lastTime) < SESSION_TIMEOUT));
     
     try {
-      const res = await apiCall('appStart', { userId: savedId });
+      const payload = { userId: isSessionValid ? savedId : "" };
+      const res = await apiCall('appStart', payload);
       if (res.error) throw new Error(res.error);
 
-      setupData = res.setupData;
-      schedules = res.schedules;
-      document.getElementById("footerInfo").innerText = `課表資料更新：${setupData['DataUpdateDate'] || 'N/A'} | 系統版本：${setupData['SystemVerDate'] || 'V1.0'}`;
+      setupData = res.setupData || {};
+      schedules = res.schedules || [];
+      document.getElementById("footerInfo").innerText = `資料更新：${setupData['DataUpdateDate'] || 'N/A'} | 版本：${setupData['SystemVerDate'] || 'V2.0'}`;
       
-      const semList = res.semesterList;
+      const semList = res.semesterList || [];
       let select = document.getElementById("globalSemester");
       semList.forEach(s => select.add(new Option(s, s)));
       currentSemesterVal = res.defaultSemester;
       select.value = currentSemesterVal;
       document.getElementById("scheduleTitle").innerText = formatSemesterTitle(currentSemesterVal);
 
-      currentSemData = res.courseData.data;
-      try { sessionStorage.setItem(`course_data_${currentSemesterVal}`, JSON.stringify(currentSemData)); } catch(e) {}
+      if(res.courseData && res.courseData.data) {
+        currentSemData = res.courseData.data;
+        try { sessionStorage.setItem(`course_data_${currentSemesterVal}`, JSON.stringify(currentSemData)); } catch(e) {}
+      }
       updateFilterOptions();
 
-      if (res.userData.status === "success") {
+      if (isSessionValid && res.userData && res.userData.status === "success") {
         currentUserId = savedId;
         userSchedules = res.userData.scheduleMap;
         document.getElementById("currentUserDisplay").innerText = currentUserId;
         refreshSession();
+        mySchedule = userSchedules[currentSemesterVal] || [];
+        refreshTimetableUI();
+        filterCourses();
       } else {
         localStorage.removeItem("schedule_uid");
         loginModal.show();
       }
-
-      mySchedule = userSchedules[currentSemesterVal] || [];
-      refreshTimetableUI();
-      filterCourses();
-
     } catch (err) {
       console.error(err);
-      alert("系統初始化失敗，請確認 API_URL 是否正確，並檢查網路連線。");
+      alert("系統初始化失敗，請確認 API_URL 是否正確。");
       loginModal.show();
     } finally {
       document.getElementById("loadingOverlay").style.display = 'none';
     }
   }
 
-  // === 登出邏輯 ===
   function logout() {
-    if(isDirty) {
-        if(!confirm("您有未儲存的變更，確定要登出並放棄變更嗎？")) return;
-    }
-    // 1. 清除本機登入紀錄
+    if(isDirty && !confirm("您有未儲存的變更，確定要登出並放棄變更嗎？")) return;
     localStorage.removeItem("schedule_uid");
     localStorage.removeItem("schedule_last_active");
-    // 2. 清空全域變數
     currentUserId = "";
     mySchedule = [];
     userSchedules = {};
     isDirty = false;
-    // 3. 清空 UI
     document.getElementById("currentUserDisplay").innerText = "未登入";
     document.getElementById("loginId").value = "";
     refreshTimetableUI(); 
-    // 4. 重新顯示登入框
     loginModal.show();
   }
 
   async function submitLogin() {
-    let id = document.getElementById("loginId").value.trim(); 
-    if (!id) return; 
+    let email = document.getElementById("loginId").value.trim(); 
+    if (!email) return; 
     let btn = document.getElementById("loginBtn");
     btn.disabled = true; btn.innerText = "驗證中...";
     
     try {
-      const res = await apiCall('handleUserLogin', { id: id });
+      const res = await apiCall('handleUserLogin', { email: email });
       if (res.status === "success") { 
-        currentUserId = id; 
+        currentUserId = email; 
         userSchedules = res.scheduleMap; 
         document.getElementById("currentUserDisplay").innerText = currentUserId; 
         refreshSession(); 
         loginModal.hide(); 
-        
         mySchedule = userSchedules[currentSemesterVal] || [];
         refreshTimetableUI();
       } else { 
         document.getElementById("loginError").innerText = res.msg; 
       }
     } catch(err) {
-      document.getElementById("loginError").innerText = "連線失敗，請檢查網路或 API 網址";
+      document.getElementById("loginError").innerText = "連線失敗，請檢查網路";
     } finally {
       btn.disabled = false; btn.innerText = "進入我的課表";
     }
@@ -369,17 +423,15 @@
     document.getElementById("loadingOverlay").style.display = 'flex';
     try {
       const res = await apiCall('getCourseData', { semester: sem });
-      if(res.error) { alert(res.error); return; }
-      
+      if(res.error) throw new Error(res.error);
       currentSemData = res.data; 
       try { sessionStorage.setItem(`course_data_${sem}`, JSON.stringify(currentSemData)); } catch(e) {}
-      
       updateFilterOptions(); filterCourses(); 
       mySchedule = userSchedules[sem] || []; 
       refreshTimetableUI(); 
       isDirty = false;
     } catch(err) {
-      alert("讀取課程失敗：" + err);
+      alert("讀取課程失敗");
     } finally {
       document.getElementById("loadingOverlay").style.display = 'none';
     }
@@ -534,16 +586,12 @@
     document.getElementById("loadingOverlay").style.display = 'flex';
     const sem = currentSemesterVal;
     try {
-      const res = await apiCall('saveUserSchedule', { semester: sem, json: JSON.stringify(mySchedule), userId: currentUserId });
+      const res = await apiCall('saveUserSchedule', { semester: sem, json: JSON.stringify(mySchedule), email: currentUserId });
       if(res.status === "success") {
         userSchedules[sem] = mySchedule;
         isDirty = false;
         if(showSuccess) successModal.show();
-        if(pendingSemester) { 
-            document.getElementById("globalSemester").value = pendingSemester; 
-            changeSemester(pendingSemester); 
-            pendingSemester = null; 
-        }
+        if(pendingSemester) { document.getElementById("globalSemester").value = pendingSemester; changeSemester(pendingSemester); pendingSemester = null; }
       } else alert(res.msg);
     } catch(err) {
       alert("儲存失敗：" + err);
@@ -579,7 +627,7 @@
         let isRequired = String(row[COL.TYPE]).includes("必");
         let typeBadge = isRequired ? '<span class="badge bg-primary me-1">必</span>' : '<span class="badge bg-secondary me-1">選</span>';
         let roomIcon = row[COL.ROOM] ? `<span class="ms-2"><i class="bi bi-geo-alt"></i> ${row[COL.ROOM]}</span>` : '';
-        html += `<div class="list-group-item course-list-item d-flex justify-content-between align-items-center p-2"><div style="flex-grow: 1;"><div class="fw-bold text-dark mb-1">${typeBadge} ${row[COL.NAME]}</div><div class="text-muted" style="font-size: 0.8rem;"><span class="badge bg-light text-dark border me-1">${displayId}</span><span>${row[COL.CLASS]}</span> | <span>${row[COL.TEACHER]}</span><div class="mt-1"><i class="bi bi-clock"></i> ${row[COL.TIME]} ${roomIcon}</div></div></div><button class="btn btn-sm btn-outline-primary ms-2 shadow-sm" onclick="addToSchedule('${idSafe}')"><i class="bi bi-plus-lg"></i></button></div>`;
+        html += `<div class="list-group-item course-list-item d-flex justify-content-between align-items-center p-2"><div style="flex-grow: 1;"><div class="fw-bold text-dark mb-1">${typeBadge} ${row[COL.NAME]}</div><div class="text-muted" style="font-size: 0.8rem;"><span class="badge bg-light text-dark border me-1">${displayId}</span><span>${row[COL.CLASS]}</span> | <span>${row[COL.TEACHER]}</span><div class="mt-1"><i class="bi bi-clock"></i> ${row[COL.TIME]} ${roomIcon}</div></div></div><button class="btn btn-sm btn-light border ms-2 shadow-sm text-primary" onclick="addToSchedule('${idSafe}')"><i class="bi bi-plus-lg fw-bold"></i></button></div>`;
         count++;
       }
     }
