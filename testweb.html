@@ -115,20 +115,13 @@
     .time-grid-cell.selected { background-color: var(--primary-color) !important; color: white !important; border-color: var(--primary-hover) !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
     .time-grid-header { font-size: 0.8rem; color: #4b5563; font-weight: bold; padding-bottom: 5px; }
 
+    /* 隱藏橫向捲動條 */
     .filter-btn-wrapper::-webkit-scrollbar { display: none; }
     .filter-btn-wrapper { -ms-overflow-style: none; scrollbar-width: none; }
 
     /* === 個人備註輸入框樣式 === */
-    .note-input {
-        border: 1px dashed #d1d5db;
-        background-color: #f8fafc;
-        transition: all 0.2s;
-    }
-    .note-input:focus {
-        border: 1px solid var(--primary-color);
-        background-color: #fff;
-        box-shadow: none;
-    }
+    .note-input { border: 1px dashed #d1d5db; background-color: #f8fafc; transition: all 0.2s; }
+    .note-input:focus { border: 1px solid var(--primary-color); background-color: #fff; box-shadow: none; }
 
     /* === 列印優化 === */
     @media print {
@@ -263,7 +256,8 @@
                 <th class="time-grid-header">日</th>
               </tr>
             </thead>
-            <tbody id="timeGridBody"></tbody>
+            <tbody id="timeGridBody">
+              </tbody>
           </table>
         </div>
       </div>
@@ -414,14 +408,15 @@
   let isTimeFilterActive = false;
 
   const SESSION_TIMEOUT = 604800000; 
-  const COL = { SEM: 0, ID: 1, NAME: 2, TYPE: 4, CATEGORY: 5, CLASS: 6, DEPT: 7, SYS: 8, TEACHER: 9, TIME: 10, ROOM: 11, CREDIT: 12, NOTE: 20 };
+  // ★ 更新常數：加入 SYLLABUS 對應第 22 欄 (index 21)
+  const COL = { SEM: 0, ID: 1, NAME: 2, TYPE: 4, CATEGORY: 5, CLASS: 6, DEPT: 7, SYS: 8, TEACHER: 9, TIME: 10, ROOM: 11, CREDIT: 12, NOTE: 20, SYLLABUS: 21 };
   const PERIODS = ["OM", "01", "02", "03", "04", "ON", "05", "06", "07", "08", "OE", "09", "10", "11", "12"];
   const PERIOD_MAP = { "OM": "07:10-08:00", "01": "08:10-09:00", "02": "09:10-10:00", "03": "10:10-11:00", "04": "11:10-12:00", "ON": "12:10-13:20", "05": "13:30-14:20", "06": "14:30-15:20", "07": "15:30-16:20", "08": "16:30-17:20", "OE": "17:30-18:20", "09": "18:30-19:15", "10": "19:15-20:00", "11": "20:10-20:55", "12": "20:55-21:40" };
   const WEEKDAY_MAP = { "一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "日": 7 };
 
   window.onload = function() {
     renderTimetableGrid();
-    renderTimeGrid();
+    renderTimeGrid(); 
     
     loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
     successModal = new bootstrap.Modal(document.getElementById('successModal'));
@@ -763,6 +758,8 @@
     if(!row) { alert("系統錯誤：找不到該課程資料"); return; }
     if (mySchedule.some(c => String(c.id) === id)) { existModal.show(); return; }
     let parsed = parseCourseTime(row[COL.TIME]);
+    
+    // 初始化時，賦予一個空白的 personalNote
     mySchedule.push({ id, name: row[COL.NAME], time: row[COL.TIME], parsed, fullData: row, personalNote: "" });
     isDirty = true;
     
@@ -773,7 +770,7 @@
     if (parsed.length > 0) { refreshTimetableUI(); } else { noTimeModal.show(); }
   }
 
-  // 1. 個人備註自動存檔邏輯
+  // 1. 個人筆記更新邏輯
   function updateNote(id, noteVal) {
       let course = mySchedule.find(c => String(c.id) === String(id));
       if(course) {
@@ -812,7 +809,9 @@
     document.getElementById("listTotalCredit").innerText = total;
     listModal.show();
   }
+  
   function listRemove(id) { courseToRemoveId = id; removeModal.show(); }
+  
   function confirmRemove() {
     if (courseToRemoveId) {
       mySchedule = mySchedule.filter(c => String(c.id) !== String(courseToRemoveId));
@@ -949,8 +948,9 @@
                 <tr><th>學分</th><td>${r[COL.CREDIT]}</td></tr>
                 <tr><th>備註</th><td class="text-danger">${r[COL.NOTE] || ""}</td></tr>`;
     
-    // 2. 教學大綱按鈕
-    let syllabusUrl = `https://nsa.ntue.edu.tw/`; // 若學校有固定網址格式可在此替換
+    // 2. 抓取教學大綱網址 (防錯：若無網址則導向系統首頁)
+    let syllabusUrl = r[COL.SYLLABUS] ? r[COL.SYLLABUS] : `https://nsa.ntue.edu.tw/`; 
+    
     html += `<tr><td colspan="2" class="text-center bg-light border-0 pt-3 pb-2">
       <a href="${syllabusUrl}" target="_blank" class="btn btn-outline-primary btn-sm w-100 fw-bold shadow-sm">
         <i class="bi bi-file-earmark-text"></i> 查看教學大綱
