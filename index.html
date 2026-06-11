@@ -8,149 +8,23 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
   
-  <style>
-    /* === 1. 現代化基礎設計 === */
-    :root {
-      --primary-color: #4f46e5;
-      --primary-hover: #4338ca;
-      --bg-color: #f3f4f6;
-      --card-bg: #ffffff;
-      --text-main: #1f2937;
-      --text-muted: #6b7280;
-      --border-color: #e5e7eb;
-    }
-
-    /* 手機版防跑版：限制最外層不超過螢幕寬度 */
-    html, body { height: 100%; margin: 0; padding: 0; overflow-x: hidden; width: 100vw; }
-    body { 
-      font-family: 'Inter', 'Noto Sans TC', sans-serif; 
-      background-color: var(--bg-color); 
-      color: var(--text-main);
-      display: flex; flex-direction: column; 
-    }
-    
-    .navbar { background-color: #111827 !important; border-bottom: 1px solid #1f2937; }
-    .navbar-brand { font-weight: 700; letter-spacing: -0.5px; }
-    .main-content { flex: 1 0 auto; padding-bottom: 30px; height: auto; overflow-x: hidden; padding-top: 15px; }
-    
-    .card, .timetable-wrapper, .modal-content { 
-      border: none; border-radius: 16px; background: var(--card-bg);
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); 
-    }
-    
-    .card-header { 
-      background-color: var(--card-bg) !important; color: var(--text-main) !important; 
-      border-bottom: 1px solid var(--border-color); font-weight: 700;
-      border-radius: 16px 16px 0 0 !important; padding: 1rem 1.25rem;
-    }
-
-    .form-control, .form-select { border-radius: 8px; border: 1px solid #d1d5db; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02); font-size: 0.9rem; }
-    .form-control:focus, .form-select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
-    .btn { border-radius: 8px; font-weight: 500; padding: 0.5rem 1rem; transition: all 0.2s; }
-    .btn-primary { background-color: var(--primary-color); border-color: var(--primary-color); }
-    .btn-primary:hover { background-color: var(--primary-hover); border-color: var(--primary-hover); }
-
-    /* 課程列表設計 */
-    #courseList { overflow-y: auto; border-top: 1px solid var(--border-color); margin-top: 10px; }
-    .list-group-item { border-left: none; border-right: none; padding: 1rem 0.5rem; border-bottom: 1px solid var(--border-color); }
-    .list-group-item:last-child { border-bottom: none; }
-
-    /* 現代化課表網格 & 手機版防跑版 */
-    .timetable-wrapper { padding: 15px; overflow-x: auto; min-height: 300px; -webkit-overflow-scrolling: touch; width: 100%; max-width: 100vw; }
-    .timetable { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 0; min-width: 800px; border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; }
-    .timetable th, .timetable td { border: 1px solid var(--border-color); text-align: center; vertical-align: middle; padding: 2px; height: 75px; }
-    .timetable th { background-color: #f9fafb; color: #4b5563; height: 45px; font-weight: 600; font-size: 0.9rem; border-bottom: 2px solid var(--border-color); }
-    .period-col { width: 60px; background-color: #f9fafb; font-weight: 600; color: #6b7280; font-size: 0.85rem; position: sticky; left: 0; z-index: 5; }
-    
-    .course-cell { border-radius: 6px; padding: 4px; margin-bottom: 3px; line-height: 1.25; cursor: pointer; text-align: left; border-left: 4px solid; transition: transform 0.15s ease, box-shadow 0.15s ease; position: relative; overflow: hidden; }
-    .course-cell:hover { transform: translateY(-2px); z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.1); overflow: visible; }
-    
-    .type-required { background-color: #e0e7ff; color: #3730a3; border-left-color: #6366f1; }
-    .type-elective { background-color: #f3f4f6; color: #374151; border-left-color: #9ca3af; }
-    .type-general { background-color: #fef3c7; color: #92400e; border-left-color: #f59e0b; }
-    .status-conflict { background-color: #fee2e2 !important; color: #991b1b !important; border-left-color: #ef4444 !important; }
-
-    .cell-title { font-size: 0.85rem; font-weight: 700; margin-bottom: 2px; letter-spacing: -0.2px; }
-    .cell-teacher { font-size: 0.75rem; opacity: 0.85; margin-bottom: 0px;}
-    .cell-room { font-size: 0.7rem; opacity: 0.7; }
-    .cell-class { font-size: 0.7rem; opacity: 0.8; margin-bottom: 2px; }
-    
-    .type-badge { font-size: 0.65rem; padding: 2px 4px; border-radius: 4px; margin-right: 4px; background: rgba(255,255,255,0.7); font-weight: 600; border: 1px solid rgba(0,0,0,0.05); }
-    .week-badge { font-size: 0.65rem; padding: 2px 4px; border-radius: 4px; margin-right: 3px; color: white; background-color: #8b5cf6; vertical-align: middle; font-weight: 600; }
-
-    .btn-delete { position: absolute; top: 2px; right: 2px; font-size: 11px; color: #dc3545; background: rgba(255,255,255,0.95); border-radius: 50%; width: 18px; height: 18px; line-height: 18px; text-align: center; display: none; z-index: 20; border: 1px solid #fecaca; }
-    .course-cell:hover .btn-delete { display: block; }
-
-    .main-footer { padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.8rem; border-top: 1px solid var(--border-color); background: var(--bg-color); flex-shrink: 0; margin-top: auto; }
-    .footer-link { color: var(--text-muted); text-decoration: none; margin-left: 10px; transition: color 0.2s; }
-    .footer-link:hover { color: var(--primary-color); }
-    #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.9); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
-    
-    @media (min-width: 768px) {
-      .desktop-h-100, .filter-card, .card-body-flex { height: 100%; overflow: hidden; }
-      .timetable-wrapper { height: 100%; overflow-y: auto; margin-top: 0; }
-      #courseList { flex: 1; max-height: none; }
-    }
-
-    /* === 📐 時間軸設計 === */
-    .timeline-container { position: relative; padding: 10px 0; margin: 0 auto; max-width: 700px; }
-    .timeline-container::after { content: ''; position: absolute; width: 2px; background-color: var(--border-color); top: 0; bottom: 0; left: 20px; margin-left: -1px; }
-    .timeline-item { padding: 10px 30px; position: relative; background-color: transparent; width: 100%; text-align: left; }
-    .timeline-item::after { content: ''; position: absolute; width: 14px; height: 14px; left: 13px; background-color: white; border: 2px solid #9ca3af; top: 18px; border-radius: 50%; z-index: 1; transition: all 0.3s; }
-    .timeline-content { padding: 15px 20px; background: white; position: relative; border-radius: 12px; border: 1px solid var(--border-color); }
-    .timeline-item.active .timeline-content { background-color: #fafafa; }
-    .timeline-item.active::after { background-color: var(--item-theme, var(--primary-color)); border-color: var(--item-theme, var(--primary-color)); box-shadow: 0 0 0 4px rgba(0,0,0,0.1); animation: pulse-dot 1.8s infinite ease-in-out; }
-    .timeline-item.past { opacity: 0.6; }
-    .timeline-item.past .timeline-content { background-color: #f9fafb; }
-    .timeline-item.past::after { background-color: #e5e7eb; border-color: #d1d5db; }
-    .step-list { padding: 0; margin-top: 15px; list-style: none; text-align: left; }
-    .step-item { padding-left: 5px; margin-bottom: 8px; color: var(--text-muted); font-size: 0.9rem; }
-    
-    @keyframes pulse-dot { 0% { box-shadow: 0 0 0 0 rgba(0,0,0,0.15); } 70% { box-shadow: 0 0 0 6px rgba(0,0,0,0); } 100% { box-shadow: 0 0 0 0 rgba(0,0,0,0); } }
-
-    /* === ⏰ 節次過濾器設計 === */
-    .time-grid-table { margin: 0 auto; border-collapse: separate; border-spacing: 2px; }
-    .time-grid-cell { cursor: pointer; transition: all 0.2s; color: #d1d5db; font-weight: bold; border-radius: 6px; padding: 6px 0 !important; background-color: #f9fafb; border: 1px solid #f3f4f6;}
-    .time-grid-cell:hover { background-color: #e5e7eb; color: #6b7280; border-color: #d1d5db; }
-    .time-grid-cell.selected { background-color: var(--primary-color) !important; color: white !important; border-color: var(--primary-hover) !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
-    .time-grid-header { font-size: 0.8rem; color: #4b5563; font-weight: bold; padding-bottom: 5px; }
-
-    /* 隱藏橫向捲動條 */
-    .filter-btn-wrapper::-webkit-scrollbar { display: none; }
-    .filter-btn-wrapper { -ms-overflow-style: none; scrollbar-width: none; }
-
-    /* === 列印優化 === */
-    @media print {
-      @page { size: A4 landscape; margin: 10mm; }
-      body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; color: #000; overflow: visible !important;}
-      .no-print, .navbar, .main-footer, .filter-card, #conflictAlert, .btn-delete, #announcementBanner { display: none !important; }
-      .main-content { padding: 0 !important; width: 100% !important; overflow: visible !important;}
-      .col-md-9 { width: 100% !important; flex: 0 0 100% !important; max-width: 100% !important; padding: 0; }
-      .timetable-wrapper { box-shadow: none !important; border: none !important; padding: 0 !important; margin: 0 !important; overflow: visible !important; height: auto !important; max-width: 100% !important; }
-      #scheduleTitle { text-align: center; font-size: 1.8rem; margin-bottom: 15px !important; color: #000; display: block; width: 100%; }
-      #scheduleTitle::after { content: " (" attr(data-user) ")"; font-size: 1.2rem; color: #555; font-weight: normal; }
-      .timetable { width: 100%; border: 2px solid #000 !important; border-radius: 0 !important; }
-      .timetable th, .timetable td { border: 1px solid #000 !important; height: auto; min-height: 80px; padding: 3px; }
-      .timetable th { background-color: #f0f0f0 !important; color: #000 !important; border-bottom: 2px solid #000 !important; font-size: 1rem; }
-      .period-col { background-color: #f8f9fa !important; color: #000 !important; font-size: 0.9rem; }
-      .course-cell { border: 1px solid #666; margin-bottom: 2px; padding: 3px 4px; background-color: #fff !important; color: #000 !important; border-left-width: 5px !important; box-shadow: none !important; }
-      .type-required { border-left-color: #6366f1 !important; }
-      .type-elective { border-left-color: #9ca3af !important; }
-      .type-general { border-left-color: #f59e0b !important; }
-      .cell-class, .cell-teacher, .type-badge { display: none !important; }
-      .cell-title { font-size: 0.9rem; margin-bottom: 1px; color: #000; }
-      .cell-room { font-size: 0.8rem; color: #444; }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div id="loadingOverlay">
   <div class="spinner-border text-primary" role="status"></div>
-  <h6 class="mt-3 text-secondary fw-bold">系統載入中</h6>
+  <h6 class="mt-3 text-secondary fw-bold" id="loadingText">系統載入中</h6>
 </div>
 
-<div class="toast-container position-fixed bottom-0 end-0 p-3 no-print" style="z-index: 1060;"><div id="liveToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true"><div class="d-flex"><div class="toast-body fw-bold"><i class="bi bi-check-circle-fill me-2"></i> 已加入課程</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div></div>
+<div class="toast-container position-fixed bottom-0 end-0 p-3 no-print" style="z-index: 1060;">
+  <div id="liveToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body fw-bold" id="toastMsg"><i class="bi bi-check-circle-fill me-2"></i> 已加入課程</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
 
 <div class="modal fade" id="creditModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header bg-dark text-white border-0"><h5 class="modal-title fw-bold"><i class="bi bi-calculator"></i> 學分試算</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body text-center p-4"><div class="mb-3"><label class="form-label fw-bold text-secondary">請選擇您的年級</label><select class="form-select w-75 mx-auto" id="creditGradeSelect" onchange="checkCredits()"><option value="1">大一</option><option value="2">大二</option><option value="3">大三</option><option value="4">大四 (含延修生)</option></select></div><h1 class="display-3 fw-bold text-primary my-3" id="currentCreditDisplay">0</h1><p class="text-muted small" id="creditRuleText">學分下限: 15 / 上限: 27</p><div class="alert alert-danger d-none mt-3 text-start border-0" id="creditAlert" style="font-size: 0.9rem; background-color: #fee2e2; color: #991b1b;"><i class="bi bi-exclamation-triangle-fill me-1"></i> 學分未在規範內，選課前請務必確認，以免違反選課辦法。</div></div><div class="modal-footer border-0 justify-content-center"><button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">關閉</button></div></div></div></div>
 <div class="modal fade" id="successModal" tabindex="-1"><div class="modal-dialog modal-sm modal-dialog-centered"><div class="modal-content"><div class="modal-body text-center py-4"><i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i><h5 class="fw-bold mt-3" id="successMsgTitle">儲存成功</h5><p class="text-muted small mb-3">資料已同步至雲端</p><button type="button" class="btn btn-success w-100 fw-bold" data-bs-dismiss="modal">確定</button></div></div></div></div>
@@ -161,30 +35,23 @@
 <div class="modal fade" id="loginModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg">
-      <div class="modal-header border-0 pb-0">
-        <h4 class="modal-title fw-bold text-dark w-100 text-center mt-3">登入系統</h4>
-      </div>
+      <div class="modal-header border-0 pb-0"><h4 class="modal-title fw-bold text-dark w-100 text-center mt-3">登入系統</h4></div>
       <div class="modal-body px-4 pb-4">
         <div class="alert alert-warning border-0 small mb-4" style="background-color: #fffbeb; color: #92400e;">
-            <div class="fw-bold mb-1"><i class="bi bi-megaphone-fill me-1"></i> 更新公告</div>
-            因工具轉移更新，已移除原密碼欄位。若曾在舊版工具建立過課表，請直接輸入原始帳號則可繼續使用；新使用者輸入您的電子郵件即可開始排課。
+            <div class="fw-bold mb-1"><i class="bi bi-megaphone-fill me-1"></i> 系統更新公告</div>
+            因系統轉移更新，已移除原系統密碼欄位。若曾在舊版系統建立過課表，請直接輸入原始帳號繼續使用；新使用者輸入您的電子郵件即可開始排課。
         </div>
         <p class="text-muted small text-center mb-4">請輸入您的 Email 建立專屬課表，下次輸入相同信箱即可載入存檔。</p>
         <form onsubmit="event.preventDefault(); submitLogin();">
-          <div class="mb-3">
-            <label class="form-label fw-bold text-secondary small">您的信箱</label>
-            <input type="email" id="loginId" class="form-control form-control-lg bg-light" placeholder="name@example.com" required>
-          </div>
-          <div class="d-grid mt-4">
-            <button type="submit" id="loginBtn" class="btn btn-primary btn-lg fw-bold shadow-sm">進入我的課表</button>
-          </div>
+          <div class="mb-3"><label class="form-label fw-bold text-secondary small">您的信箱</label><input type="email" id="loginId" class="form-control form-control-lg bg-light" placeholder="name@example.com" required></div>
+          <div class="d-grid mt-4"><button type="submit" id="loginBtn" class="btn btn-primary btn-lg fw-bold shadow-sm">進入我的課表</button></div>
         </form>
         <div id="loginError" class="text-danger mt-2 small text-center fw-bold"></div>
         <div class="bg-light p-3 rounded-3 mt-4 border border-light">
           <h6 class="fw-bold mb-2 small text-secondary"><i class="bi bi-shield-check"></i> 服務條款與聲明</h6>
           <ul class="list-unstyled mb-0 text-muted" style="font-size: 0.75rem;">
             <li class="mb-1">1. 本系統為個人輔助工具，非校方官方系統，結果請以校務系統為準。</li>
-            <li class="mb-1">2. 課程資訊僅供個人排課參考，若有異動依校方公告為主。</li>
+            <li class="mb-1">2. 課程資訊僅供排課參考，若有異動依校方公告為主。</li>
             <li>3. 使用本服務即代表同意自行承擔風險，開發者不負資料正確性之擔保責任。</li>
           </ul>
         </div>
@@ -201,25 +68,20 @@
           <h5 class="modal-title fw-bold text-dark fs-4" id="infoModalTitle">選課時程公告</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-        
         <a href="https://academicntue.ntue.edu.tw/p/412-1002-485.php" target="_blank" class="text-secondary small text-decoration-none mb-3 px-2 py-1 rounded bg-light border transition-all" style="opacity: 0.85;">
           <i class="bi bi-box-arrow-up-right me-1"></i> 學校官方選課專區
         </a>
-
         <div class="w-100 overflow-auto filter-btn-wrapper" id="scheduleFilterGroup" style="display: none !important;">
            <div class="btn-group shadow-sm" role="group" style="min-width: 100%;">
              <input type="radio" class="btn-check" name="schedFilter" id="schedOld" autocomplete="off" checked onchange="renderScheduleCards('舊生')">
              <label class="btn btn-outline-primary fw-bold small text-nowrap" for="schedOld">舊生選課</label>
-
              <input type="radio" class="btn-check" name="schedFilter" id="schedNewUg" autocomplete="off" onchange="renderScheduleCards('大學部新生')">
              <label class="btn btn-outline-primary fw-bold small text-nowrap" for="schedNewUg">大學部新生</label>
-             
              <input type="radio" class="btn-check" name="schedFilter" id="schedNewPg" autocomplete="off" onchange="renderScheduleCards('碩博班新生')">
              <label class="btn btn-outline-primary fw-bold small text-nowrap" for="schedNewPg">碩博班新生</label>
            </div>
         </div>
       </div>
-      
       <div class="modal-body bg-light pt-2">
         <div class="timeline-container" id="infoModalBody"></div>
       </div>
@@ -245,15 +107,8 @@
         </div>
         <div class="table-responsive">
           <table class="table table-borderless text-center time-grid-table mb-0" style="table-layout: fixed; font-size: 0.85rem;">
-            <thead>
-              <tr>
-                <th class="time-grid-header">一</th><th class="time-grid-header">二</th><th class="time-grid-header">三</th>
-                <th class="time-grid-header">四</th><th class="time-grid-header">五</th><th class="time-grid-header">六</th>
-                <th class="time-grid-header">日</th>
-              </tr>
-            </thead>
-            <tbody id="timeGridBody">
-              </tbody>
+            <thead><tr><th class="time-grid-header">一</th><th class="time-grid-header">二</th><th class="time-grid-header">三</th><th class="time-grid-header">四</th><th class="time-grid-header">五</th><th class="time-grid-header">六</th><th class="time-grid-header">日</th></tr></thead>
+            <tbody id="timeGridBody"></tbody>
           </table>
         </div>
       </div>
@@ -266,7 +121,34 @@
 </div>
 
 <div class="modal fade" id="courseModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header border-0 bg-light"><h5 class="modal-title fw-bold" id="modalCourseTitle">課程資訊</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-0"><table class="table table-striped mb-0"><tbody id="modalBody"></tbody></table></div></div></div></div>
-<div class="modal fade" id="listModal" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"><div class="modal-content"><div class="modal-header bg-dark text-white border-0"><h5 class="modal-title fw-bold"><i class="bi bi-list-check"></i> 已選課程清單</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-0"><div class="alert alert-light border-bottom small mb-0 rounded-0 text-center text-muted border-0"><i class="bi bi-info-circle"></i> 列表依加入時間排序</div><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>代碼</th><th>名稱</th><th>教師</th><th>時間</th><th>學分</th><th>操作</th></tr></thead><tbody id="listModalBody"></tbody></table></div></div><div class="modal-footer border-0 bg-light"><button type="button" class="btn btn-outline-dark btn-sm me-auto fw-bold" onclick="printList()"><i class="bi bi-printer"></i> 列印清單</button><div class="fw-bold text-primary fs-5">總學分: <span id="listTotalCredit">0</span></div><button type="button" class="btn btn-secondary btn-sm ms-3 px-3 fw-bold" data-bs-dismiss="modal">關閉</button></div></div></div></div>
+
+<div class="modal fade" id="listModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white border-0">
+        <h5 class="modal-title fw-bold"><i class="bi bi-list-check"></i> 已選課程清單</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="alert alert-light border-bottom small mb-0 rounded-0 text-center text-muted border-0">
+          <i class="bi bi-info-circle"></i> 列表依加入時間排序，點擊「備註」可自行輸入提醒事項。
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light"><tr><th>代碼</th><th>名稱 / 備註</th><th>教師</th><th>時間</th><th>學分</th><th>操作</th></tr></thead>
+            <tbody id="listModalBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-outline-dark btn-sm me-auto fw-bold" onclick="printList()"><i class="bi bi-printer"></i> 列印清單</button>
+        <div class="fw-bold text-primary fs-5">總學分: <span id="listTotalCredit">0</span></div>
+        <button type="button" class="btn btn-secondary btn-sm ms-3 px-3 fw-bold" data-bs-dismiss="modal">關閉</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal fade" id="noTimeModal" tabindex="-1"><div class="modal-dialog modal-sm modal-dialog-centered"><div class="modal-content"><div class="modal-body text-center py-4"><i class="bi bi-info-circle-fill text-warning" style="font-size: 3rem;"></i><h5 class="fw-bold mt-3">已加入清單</h5><p class="text-muted small mb-3">此課程無時間資訊，請至清單中查看</p><button type="button" class="btn btn-warning text-dark fw-bold w-100" data-bs-dismiss="modal">知道了</button></div></div></div></div>
 <div class="modal fade" id="unsavedModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header bg-warning text-dark border-0"><h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> 尚未儲存</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body text-center py-4"><h5 class="fw-bold mb-2">您有未儲存的變更</h5><p class="text-muted small mb-0">離開前是否要儲存目前的課表？</p></div><div class="modal-footer border-0 justify-content-center bg-light"><button type="button" class="btn btn-light border fw-bold" data-bs-dismiss="modal">取消</button><button type="button" class="btn btn-danger fw-bold" onclick="handleUnsavedLeave()">不儲存離開</button><button type="button" class="btn btn-success fw-bold px-4" onclick="handleUnsavedSave()">儲存</button></div></div></div></div>
 
@@ -349,640 +231,7 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  // ==========================================
-  // ⚠️ 這是 GitHub Pages 專用，請設定 API_URL
-  // ==========================================
-  const API_URL = "https://script.google.com/macros/s/AKfycbw1tjPCIgpEXB0M5PhjHvGp3OhDu_INFtUFZbO8QvaPzNrOlqnTKXuQIWU25RIfHdWq/exec";
-
-  async function apiCall(action, params = {}) {
-    params.action = action; 
-    const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(params)
-    });
-    return await response.json();
-  }
-
-  let allData = [], currentSemData = [], userSchedules = {}, mySchedule = [], setupData = {}, schedules = [];
-  let currentSchedulesForModal = []; 
-  let currentUserId = "";
-  let loginModal, successModal, existModal, clearModal, removeModal, infoModal, courseModal, creditModal, listModal, unsavedModal, noTimeModal;
-  let courseToRemoveId = null;
-  let currentSemesterVal = ""; 
-  let isDirty = false, pendingSemester = null, toastEl;
-  
-  // 時間篩選器變數
-  let selectedTimeSlots = new Set();
-  let isTimeFilterActive = false;
-
-  const SESSION_TIMEOUT = 604800000; 
-  const COL = { SEM: 0, ID: 1, NAME: 2, TYPE: 4, CATEGORY: 5, CLASS: 6, DEPT: 7, SYS: 8, TEACHER: 9, TIME: 10, ROOM: 11, CREDIT: 12, NOTE: 20 };
-  const PERIODS = ["OM", "01", "02", "03", "04", "ON", "05", "06", "07", "08", "OE", "09", "10", "11", "12"];
-  const PERIOD_MAP = { "OM": "07:10-08:00", "01": "08:10-09:00", "02": "09:10-10:00", "03": "10:10-11:00", "04": "11:10-12:00", "ON": "12:10-13:20", "05": "13:30-14:20", "06": "14:30-15:20", "07": "15:30-16:20", "08": "16:30-17:20", "OE": "17:30-18:20", "09": "18:30-19:15", "10": "19:15-20:00", "11": "20:10-20:55", "12": "20:55-21:40" };
-  const WEEKDAY_MAP = { "一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "日": 7 };
-
-  window.onload = function() {
-    renderTimetableGrid();
-    renderTimeGrid(); // 初始化時間篩選網格
-    
-    loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
-    successModal = new bootstrap.Modal(document.getElementById('successModal'));
-    existModal = new bootstrap.Modal(document.getElementById('existModal'));
-    clearModal = new bootstrap.Modal(document.getElementById('clearModal'));
-    removeModal = new bootstrap.Modal(document.getElementById('removeModal'));
-    infoModal = new bootstrap.Modal(document.getElementById('infoModal'));
-    courseModal = new bootstrap.Modal(document.getElementById('courseModal'));
-    creditModal = new bootstrap.Modal(document.getElementById('creditModal'));
-    listModal = new bootstrap.Modal(document.getElementById('listModal'));
-    unsavedModal = new bootstrap.Modal(document.getElementById('unsavedModal'));
-    noTimeModal = new bootstrap.Modal(document.getElementById('noTimeModal'));
-    toastEl = new bootstrap.Toast(document.getElementById('liveToast'), {delay: 2000});
-    window.addEventListener('beforeunload', function (e) { if (isDirty) { e.preventDefault(); e.returnValue = ''; } });
-    
-    initApp();
-  };
-
-  async function initApp() {
-    const savedId = localStorage.getItem("schedule_uid");
-    const lastTime = localStorage.getItem("schedule_last_active");
-    let isSessionValid = (savedId && lastTime && (Date.now() - parseInt(lastTime) < SESSION_TIMEOUT));
-    
-    try {
-      const payload = { email: isSessionValid ? savedId : "" };
-      const res = await apiCall('appStart', payload);
-      if (res.error) throw new Error(res.error);
-
-      setupData = res.setupData || {};
-      schedules = res.schedules || [];
-      document.getElementById("footerInfo").innerText = `資料更新：${setupData['DataUpdateDate'] || 'N/A'} | 版本：${setupData['SystemVerDate'] || 'V2.0'}`;
-      
-      // 📣 顯示公告
-      if (setupData['Announcement'] && setupData['Announcement'].trim() !== "") {
-          document.getElementById('announcementText').innerText = setupData['Announcement'];
-          document.getElementById('announcementBanner').classList.remove('d-none');
-      }
-
-      const semList = res.semesterList || [];
-      let select = document.getElementById("globalSemester");
-      semList.forEach(s => select.add(new Option(s, s)));
-      currentSemesterVal = res.defaultSemester;
-      select.value = currentSemesterVal;
-      updateScheduleTitle(currentSemesterVal, isSessionValid ? savedId : "");
-
-      if(res.courseData && res.courseData.data) {
-        currentSemData = res.courseData.data;
-        try { sessionStorage.setItem(`course_data_${currentSemesterVal}`, JSON.stringify(currentSemData)); } catch(e) {}
-      }
-      updateFilterOptions();
-
-      if (isSessionValid && res.userData && res.userData.status === "success") {
-        currentUserId = savedId;
-        userSchedules = res.userData.scheduleMap;
-        document.getElementById("currentUserDisplay").innerText = currentUserId;
-        refreshSession();
-        mySchedule = userSchedules[currentSemesterVal] || [];
-        refreshTimetableUI();
-        filterCourses();
-      } else {
-        localStorage.removeItem("schedule_uid");
-        loginModal.show();
-      }
-    } catch (err) {
-      console.error(err);
-      alert("系統初始化失敗，請確認 API_URL 是否正確。");
-      loginModal.show();
-    } finally {
-      document.getElementById("loadingOverlay").style.display = 'none';
-    }
-  }
-
-  function logout() {
-    if(isDirty && !confirm("您有未儲存的變更，確定要登出並放棄變更嗎？")) return;
-    localStorage.removeItem("schedule_uid");
-    localStorage.removeItem("schedule_last_active");
-    currentUserId = "";
-    mySchedule = [];
-    userSchedules = {};
-    isDirty = false;
-    document.getElementById("currentUserDisplay").innerText = "未登入";
-    updateScheduleTitle(currentSemesterVal, "");
-    document.getElementById("loginId").value = "";
-    refreshTimetableUI(); 
-    loginModal.show();
-  }
-
-  async function submitLogin() {
-    let email = document.getElementById("loginId").value.trim(); 
-    if (!email) return; 
-    let btn = document.getElementById("loginBtn");
-    btn.disabled = true; btn.innerText = "驗證中...";
-    
-    try {
-      const res = await apiCall('handleUserLogin', { email: email });
-      if (res.status === "success") { 
-        currentUserId = email; 
-        userSchedules = res.scheduleMap; 
-        document.getElementById("currentUserDisplay").innerText = currentUserId; 
-        updateScheduleTitle(currentSemesterVal, currentUserId);
-        refreshSession(); 
-        loginModal.hide(); 
-        mySchedule = userSchedules[currentSemesterVal] || [];
-        refreshTimetableUI();
-      } else { 
-        document.getElementById("loginError").innerText = res.msg; 
-      }
-    } catch(err) {
-      document.getElementById("loginError").innerText = "連線失敗，請檢查網路";
-    } finally {
-      btn.disabled = false; btn.innerText = "進入我的課表";
-    }
-  }
-
-  function onSemesterSelectChange() {
-    const newSem = document.getElementById("globalSemester").value;
-    if (isDirty) { pendingSemester = newSem; unsavedModal.show(); document.getElementById("globalSemester").value = currentSemesterVal; } 
-    else { changeSemester(newSem); }
-  }
-  function handleUnsavedLeave() { unsavedModal.hide(); isDirty = false; if(pendingSemester) { document.getElementById("globalSemester").value = pendingSemester; changeSemester(pendingSemester); pendingSemester = null; } }
-  function handleUnsavedSave() { unsavedModal.hide(); saveToBackend(false); }
-
-  async function changeSemester(sem) {
-    if(!sem) sem = document.getElementById("globalSemester").value;
-    currentSemesterVal = sem; 
-    refreshSession();
-    updateScheduleTitle(sem, currentUserId);
-    document.querySelectorAll("td[id^='cell-']").forEach(td => td.innerHTML = "");
-    
-    const cachedData = sessionStorage.getItem(`course_data_${sem}`);
-    if(cachedData) {
-        currentSemData = JSON.parse(cachedData);
-        updateFilterOptions(); filterCourses(); 
-        mySchedule = userSchedules[sem] || []; 
-        refreshTimetableUI(); 
-        isDirty = false;
-        return;
-    }
-    
-    document.getElementById("loadingOverlay").style.display = 'flex';
-    try {
-      const res = await apiCall('getCourseData', { semester: sem });
-      if(res.error) throw new Error(res.error);
-      currentSemData = res.data; 
-      try { sessionStorage.setItem(`course_data_${sem}`, JSON.stringify(currentSemData)); } catch(e) {}
-      updateFilterOptions(); filterCourses(); 
-      mySchedule = userSchedules[sem] || []; 
-      refreshTimetableUI(); 
-      isDirty = false;
-    } catch(err) {
-      alert("讀取課程失敗");
-    } finally {
-      document.getElementById("loadingOverlay").style.display = 'none';
-    }
-  }
-
-  function parseCourseTime(timeStr) {
-    if (!timeStr) return [];
-    let raw = timeStr.replace(/[\uFF01-\uFF5E]/g, function(c) { return String.fromCharCode(c.charCodeAt(0) - 0xFEE0); }).replace(/\u3000/g, " ");
-    raw = raw.toUpperCase().replace(/0N/g, "ON").replace(/0E/g, "OE").replace(/0M/g, "OM");
-    let weekType = "ALL";
-    if (raw.includes("單週") && !raw.includes("雙週")) weekType = "ODD";
-    else if (raw.includes("雙週") && !raw.includes("單週")) weekType = "EVEN";
-    let cleanRaw = raw.replace(/-[\u4e00-\u9fa5]+/g, ""); 
-    const regex = /([\u4e00-\u9fa5])\s*\(([^)]+)\)/g;
-    let results = [], match;
-    while ((match = regex.exec(cleanRaw)) !== null) {
-      let weekdayIndex = WEEKDAY_MAP[match[1]];
-      let periods = match[2].split(',').map(p => {
-          let s = p.trim();
-          if (/^\d$/.test(s)) return '0' + s; 
-          if (s === 'E' || s === '0E') return 'OE';
-          if (s === 'N' || s === '0N') return 'ON';
-          if (s === 'M' || s === '0M') return 'OM';
-          return s;
-      }).filter(p => p);
-      if (weekdayIndex && periods.length > 0) results.push({ weekdayIndex, periods, weekType });
-    }
-    return results;
-  }
-
-  // === ⏰ 節次篩選器邏輯 ===
-  function renderTimeGrid() {
-    const tbody = document.getElementById("timeGridBody");
-    let html = "";
-    PERIODS.forEach(p => {
-      html += `<tr>`;
-      for (let d = 1; d <= 7; d++) {
-        let key = `${d}-${p}`;
-        html += `<td id="tg-${key}" class="time-grid-cell" onclick="toggleTimeSlot('${key}')">${p}</td>`;
-      }
-      html += `</tr>`;
-    });
-    tbody.innerHTML = html;
-  }
-
-  function toggleTimeSlot(key) {
-    const cell = document.getElementById(`tg-${key}`);
-    if (selectedTimeSlots.has(key)) {
-      selectedTimeSlots.delete(key);
-      cell.classList.remove('selected');
-    } else {
-      selectedTimeSlots.add(key);
-      cell.classList.add('selected');
-    }
-  }
-
-  function clearTimeFilter() {
-    selectedTimeSlots.clear();
-    document.querySelectorAll('.time-grid-cell.selected').forEach(c => c.classList.remove('selected'));
-    isTimeFilterActive = false;
-    document.getElementById('strictTimeSearch').checked = false;
-    updateTimeFilterBtnUI();
-    filterCourses();
-  }
-
-  function applyTimeFilter(fromButton = false) {
-    isTimeFilterActive = selectedTimeSlots.size > 0;
-    updateTimeFilterBtnUI();
-    if (fromButton) filterCourses();
-  }
-
-  function updateTimeFilterBtnUI() {
-    let btn = document.getElementById('timeFilterBtn');
-    if (isTimeFilterActive) {
-      btn.classList.replace('btn-primary', 'btn-success');
-      btn.innerHTML = `<i class="bi bi-check-circle-fill"></i> 節次 (${selectedTimeSlots.size})`;
-    } else {
-      btn.classList.replace('btn-success', 'btn-primary');
-      btn.innerHTML = `<i class="bi bi-clock"></i> 節次`;
-    }
-  }
-
-  // === 課程列表過濾 (含節次判斷) ===
-  function filterCourses() {
-    const key = document.getElementById("keyword").value.toLowerCase();
-    const classVal = document.getElementById("classInput").value;
-    const deptVal = document.getElementById("deptInput").value;
-    const isStrict = document.getElementById('strictTimeSearch').checked;
-    const listDiv = document.getElementById("courseList");
-    
-    let count = 0;
-    let html = '<div class="list-group list-group-flush">';
-    
-    for (let row of currentSemData) {
-      if (count >= 50) break;
-      
-      let matchKey = !key || `${row[COL.NAME]} ${row[COL.TEACHER]} ${row[COL.SYS]} ${row[COL.ID]}`.toLowerCase().includes(key);
-      let matchClass = !classVal || String(row[COL.CLASS]).includes(classVal);
-      let matchDept = !deptVal || String(row[COL.DEPT]).includes(deptVal);
-      
-      // 節次篩選邏輯
-      let matchTime = true;
-      if (isTimeFilterActive) {
-          let parsedTime = parseCourseTime(row[COL.TIME]);
-          let courseSlots = [];
-          parsedTime.forEach(seg => {
-              seg.periods.forEach(p => {
-                  courseSlots.push(`${seg.weekdayIndex}-${p}`);
-              });
-          });
-
-          if (courseSlots.length === 0) {
-              matchTime = false; // 無時間的課，篩選時先過濾掉
-          } else if (isStrict) {
-              // 嚴格：課程所有節次都必須在選取的節次內
-              matchTime = courseSlots.every(slot => selectedTimeSlots.has(slot));
-          } else {
-              // 寬鬆：課程只要有一個節次在選取內即可
-              matchTime = courseSlots.some(slot => selectedTimeSlots.has(slot));
-          }
-      }
-
-      if (matchKey && matchClass && matchDept && matchTime) {
-        let idSafe = String(row[COL.ID]);
-        let displayId = idSafe.padStart(4, '0');
-        let isRequired = String(row[COL.TYPE]).includes("必");
-        let typeBadge = isRequired ? '<span class="badge bg-primary me-1">必</span>' : '<span class="badge bg-secondary me-1">選</span>';
-        let roomIcon = row[COL.ROOM] ? `<span class="ms-2"><i class="bi bi-geo-alt"></i> ${row[COL.ROOM]}</span>` : '';
-        html += `<div class="list-group-item course-list-item d-flex justify-content-between align-items-center p-2"><div style="flex-grow: 1;"><div class="fw-bold text-dark mb-1">${typeBadge} ${row[COL.NAME]}</div><div class="text-muted" style="font-size: 0.8rem;"><span class="badge bg-light text-dark border me-1">${displayId}</span><span>${row[COL.CLASS]}</span> | <span>${row[COL.TEACHER]}</span><div class="mt-1"><i class="bi bi-clock"></i> ${row[COL.TIME]} ${roomIcon}</div></div></div><button class="btn btn-sm btn-light border ms-2 shadow-sm text-primary fw-bold" onclick="addToSchedule('${idSafe}')"><i class="bi bi-plus-lg"></i></button></div>`;
-        count++;
-      }
-    }
-    if (count === 0) listDiv.innerHTML = '<div class="p-4 text-center text-muted">查無符合課程</div>';
-    else listDiv.innerHTML = html + '</div>';
-  }
-
-  function refreshTimetableUI() {
-    document.querySelectorAll("td[id^='cell-']").forEach(td => td.innerHTML = "");
-    let hasConflictAlert = false;
-    let gridMap = {};
-
-    mySchedule.forEach(course => {
-      let timeSegments = [];
-      if (course.parsed) {
-          if (Array.isArray(course.parsed)) timeSegments = course.parsed;
-          else if (typeof course.parsed === 'object') timeSegments = [course.parsed]; 
-      }
-      timeSegments.forEach(seg => {
-        let type = seg.weekType || "ALL";
-        seg.periods.forEach(p => {
-            let key = `${seg.weekdayIndex}-${p}`;
-            if (!gridMap[key]) gridMap[key] = [];
-            gridMap[key].push({ course, type });
-        });
-      });
-    });
-
-    for (const [key, items] of Object.entries(gridMap)) {
-        let cell = document.getElementById(`cell-${key}`);
-        if (!cell) continue;
-        let isConflict = false;
-        if (items.length > 1) {
-            if (items.length === 2) {
-                let t1 = items[0].type, t2 = items[1].type;
-                if (!((t1 === "ODD" && t2 === "EVEN") || (t1 === "EVEN" && t2 === "ODD"))) isConflict = true;
-            } else isConflict = true;
-        }
-        if (isConflict) hasConflictAlert = true;
-
-        items.forEach(item => {
-            let course = item.course;
-            let row = course.fullData;
-            if(!row) return; 
-            let idSafe = String(course.id);
-            let isGeneral = String(row[COL.CATEGORY]).includes("通識");
-            let isRequired = String(row[COL.TYPE]).includes("必");
-            let colorClass = isGeneral ? "type-general" : (isRequired ? "type-required" : "type-elective");
-            if (isConflict) colorClass = "status-conflict";
-            let typeChar = isRequired ? "必" : "選";
-            let badgeHtml = `<span class="type-badge">${typeChar}</span>`;
-            let weekBadge = "";
-            if (item.type === "ODD") weekBadge = `<span class="week-badge">單週</span>`;
-            if (item.type === "EVEN") weekBadge = `<span class="week-badge" style="background-color:#e83e8c">雙週</span>`;
-
-            cell.innerHTML += `<div class="course-cell ${colorClass}" onclick="showCourseDetails('${idSafe}')"><div class="btn-delete" onclick="event.stopPropagation(); removeCourse('${idSafe}')"><i class="bi bi-trash3-fill"></i></div><div class="cell-class text-truncate">${row[COL.CLASS]}</div><div class="cell-title text-truncate">${weekBadge}${badgeHtml}${row[COL.NAME]}</div><div class="cell-teacher text-truncate"><i class="bi bi-person-fill" style="font-size:0.7rem;"></i> ${row[COL.TEACHER]}</div><div class="cell-room text-truncate"><i class="bi bi-geo-alt-fill" style="font-size:0.6rem;"></i> ${row[COL.ROOM] || "未定"}</div></div>`;
-        });
-    }
-    document.getElementById("conflictAlert").style.display = hasConflictAlert ? "block" : "none";
-  }
-
-  function addToSchedule(idStr) {
-    const id = String(idStr);
-    let row = currentSemData.find(r => String(r[COL.ID]) === id);
-    if(!row) { alert("系統錯誤：找不到該課程資料"); return; }
-    if (mySchedule.some(c => String(c.id) === id)) { existModal.show(); return; }
-    let parsed = parseCourseTime(row[COL.TIME]);
-    mySchedule.push({ id, name: row[COL.NAME], time: row[COL.TIME], parsed, fullData: row });
-    isDirty = true;
-    if (parsed.length > 0) { refreshTimetableUI(); toastEl.show(); } else { noTimeModal.show(); }
-  }
-
-  function openListModal() {
-    let tbody = document.getElementById("listModalBody");
-    tbody.innerHTML = "";
-    let total = 0;
-    if (mySchedule.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">尚未加入任何課程</td></tr>';
-    } else {
-        mySchedule.forEach(c => {
-            let r = c.fullData;
-            if(!r) return;
-            let credit = parseFloat(r[COL.CREDIT]) || 0;
-            total += credit;
-            let idSafe = String(c.id);
-            tbody.innerHTML += `<tr><td><span class="badge bg-secondary">${String(r[COL.ID]).padStart(4,'0')}</span></td><td class="fw-bold">${r[COL.NAME]}</td><td>${r[COL.TEACHER]}</td><td class="small text-muted">${r[COL.TIME]}</td><td><span class="fw-bold text-primary">${credit}</span></td><td><button class="btn btn-outline-danger btn-sm" onclick="listRemove('${idSafe}')"><i class="bi bi-trash3"></i></button></td></tr>`;
-        });
-    }
-    document.getElementById("listTotalCredit").innerText = total;
-    listModal.show();
-  }
-  function listRemove(id) { courseToRemoveId = id; removeModal.show(); }
-  function confirmRemove() {
-    if (courseToRemoveId) {
-      mySchedule = mySchedule.filter(c => String(c.id) !== String(courseToRemoveId));
-      refreshTimetableUI();
-      if (document.getElementById('listModal').classList.contains('show')) openListModal();
-      courseToRemoveId = null;
-      isDirty = true;
-    }
-    removeModal.hide();
-  }
-  
-  function printList() {
-    let content = `
-      <html><head><title>已選課程清單</title>
-      <style>
-        body { font-family: 'Helvetica Neue', Arial, sans-serif; padding: 20px; color: #333; }
-        h2 { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px 8px; text-align: left; }
-        th { background: #f8f9fa; color: #000; font-weight: bold; border-bottom: 2px solid #ccc; }
-        tr:nth-child(even) { background-color: #fcfcfc; }
-        .total-row { background: #eee; font-weight: bold; font-size: 1.1em; }
-        .text-right { text-align: right; }
-      </style>
-      </head><body>
-      <h2>${document.getElementById("scheduleTitle").innerText} - 選課清單</h2>
-      <table><thead><tr><th>代碼</th><th>課程名稱</th><th>教師</th><th>時間</th><th>學分</th></tr></thead><tbody>`;
-    
-    let total = 0;
-    mySchedule.forEach(c => { 
-        let r = c.fullData; if(!r) return; 
-        let credit = parseFloat(r[COL.CREDIT]) || 0; total += credit; 
-        content += `<tr><td>${String(r[COL.ID]).padStart(4,'0')}</td><td><b>${r[COL.NAME]}</b></td><td>${r[COL.TEACHER]}</td><td>${r[COL.TIME]}</td><td>${credit}</td></tr>`; 
-    });
-    content += `</tbody><tfoot><tr class="total-row"><td colspan="4" class="text-right">總學分</td><td>${total}</td></tr></tfoot></table>
-      <div style="text-align: center; font-size: 0.8rem; color: #666; margin-top: 30px;">印出時間: ${new Date().toLocaleString()}</div>
-      </body></html>`;
-    let win = window.open('', '', 'height=600,width=800'); win.document.write(content); win.document.close(); win.print();
-  }
-  function removeCourse(id) { courseToRemoveId = id; removeModal.show(); }
-  function openClearModal() { clearModal.show(); }
-  
-  async function confirmClear() { 
-    if (!currentUserId) { loginModal.show(); return; } 
-    refreshSession(); 
-    mySchedule = []; 
-    refreshTimetableUI(); 
-    clearModal.hide(); 
-    await saveToBackend(true); 
-  }
-  
-  async function saveSchedule() { 
-    if (!currentUserId) { loginModal.show(); return; } 
-    refreshSession(); 
-    await saveToBackend(true); 
-  }
-  
-  async function saveToBackend(showSuccess = false) {
-    document.getElementById("loadingOverlay").style.display = 'flex';
-    const sem = currentSemesterVal;
-    try {
-      const res = await apiCall('saveUserSchedule', { semester: sem, json: JSON.stringify(mySchedule), email: currentUserId });
-      if(res.status === "success") {
-        userSchedules[sem] = mySchedule;
-        isDirty = false;
-        if(showSuccess) successModal.show();
-        if(pendingSemester) { 
-            document.getElementById("globalSemester").value = pendingSemester; 
-            changeSemester(pendingSemester); 
-            pendingSemester = null; 
-        }
-      } else alert(res.msg);
-    } catch(err) {
-      alert("儲存失敗：" + err);
-    } finally {
-      document.getElementById("loadingOverlay").style.display = 'none';
-    }
-  }
-  
-  function printSchedule() { window.print(); }
-  function refreshSession() { if (currentUserId) { localStorage.setItem("schedule_uid", currentUserId); localStorage.setItem("schedule_last_active", Date.now()); } }
-  
-  function updateScheduleTitle(sem, userEmail) {
-      document.getElementById("scheduleTitle").innerText = formatSemesterTitle(sem);
-      document.getElementById("scheduleTitle").setAttribute("data-user", userEmail || "未登入");
-  }
-  
-  function formatSemesterTitle(sem) { 
-      if (sem && sem.includes("-")) { 
-          let parts = sem.split("-"); 
-          let termChi = parts[1] == "1" ? "第一" : (parts[1] == "2" ? "第二" : parts[1]); 
-          return `${parts[0]}學年度${termChi}學期`; 
-      } 
-      return sem; 
-  }
-  
-  function updateFilterOptions() {
-    let classes = [...new Set(currentSemData.map(r => r[COL.CLASS]))].sort(); document.getElementById("classOptions").innerHTML = classes.map(c => `<option value="${c}">`).join('');
-    let depts = [...new Set(currentSemData.map(r => r[COL.DEPT]))].sort(); document.getElementById("deptOptions").innerHTML = depts.map(d => `<option value="${d}">`).join('');
-  }
-  
-  function clearFilters() {
-    document.getElementById("keyword").value = "";
-    document.getElementById("classInput").value = "";
-    document.getElementById("deptInput").value = "";
-    filterCourses();
-  }
-  
-  function renderTimetableGrid() {
-    const tbody = document.getElementById("timetableBody");
-    let html = "";
-    PERIODS.forEach(p => {
-      html += `<tr><td class="period-col"><div class="mt-1">${p}</div><div style="font-size:0.7em;font-weight:normal;">${PERIOD_MAP[p].split('-')[0]}</div><div style="font-size:0.7em;font-weight:normal;">${PERIOD_MAP[p].split('-')[1]}</div></td>`;
-      for (let d = 1; d <= 7; d++) html += `<td id="cell-${d}-${p}"></td>`;
-      html += `</tr>`;
-    });
-    tbody.innerHTML = html;
-  }
-  
-  function showCourseDetails(id) {
-    const c = mySchedule.find(x => String(x.id) === String(id)); if(!c) return; const r = c.fullData;
-    document.getElementById("modalCourseTitle").innerText = r[COL.NAME];
-    let html = `<tr><th width="30%">學期</th><td>${r[COL.SEM]}</td></tr><tr><th>代碼</th><td>${String(r[COL.ID]).padStart(4,'0')}</td></tr><tr><th>教師</th><td>${r[COL.TEACHER]}</td></tr><tr><th>班級</th><td>${r[COL.CLASS]}</td></tr><tr><th>選別</th><td>${r[COL.TYPE]}</td></tr><tr><th>修別</th><td>${r[COL.CATEGORY]}</td></tr><tr><th>時間</th><td>${r[COL.TIME]}</td></tr><tr><th>教室</th><td>${r[COL.ROOM]}</td></tr><tr><th>學分</th><td>${r[COL.CREDIT]}</td></tr><tr><th>備註</th><td class="text-danger">${r[COL.NOTE] || ""}</td></tr>`;
-    document.getElementById("modalBody").innerHTML = html;
-    courseModal.show();
-  }
-  
-  function openCreditModal() {
-    let total = 0; mySchedule.forEach(c => { let r = c.fullData; if(r) { let credit = parseFloat(r[COL.CREDIT]); if(!isNaN(credit)) total += credit; }});
-    document.getElementById("currentCreditDisplay").innerText = total; checkCredits(total); creditModal.show();
-  }
-  
-  function checkCredits(currentTotal) {
-    if(currentTotal === undefined) currentTotal = parseFloat(document.getElementById("currentCreditDisplay").innerText);
-    let grade = document.getElementById("creditGradeSelect").value; let ruleText = "", isValid = true;
-    if (grade == "1") { ruleText = "學分下限: 15 / 上限: 27"; if (currentTotal < 15 || currentTotal > 27) isValid = false; }
-    else if (grade == "2" || grade == "3") { ruleText = "學分下限: 15 (無上限)"; if (currentTotal < 15) isValid = false; }
-    else if (grade == "4") { ruleText = "至少修習一門課程"; if (mySchedule.length === 0) isValid = false; }
-    document.getElementById("creditRuleText").innerText = ruleText;
-    let alertBox = document.getElementById("creditAlert"); if (!isValid) alertBox.classList.remove("d-none"); else alertBox.classList.add("d-none");
-  }
-  
-  function openInfoModal() {
-    const sem = document.getElementById("globalSemester").value; 
-    document.getElementById("infoModalTitle").innerText = formatSemesterTitle(sem).replace(" 預排課表", "") + " 選課時程公告";
-    currentSchedulesForModal = schedules.filter(item => item.semester === sem);
-    
-    const filterGroup = document.getElementById('scheduleFilterGroup');
-    
-    if (sem.endsWith('-1') && currentSchedulesForModal.length > 0) {
-        filterGroup.style.setProperty('display', 'flex', 'important');
-        document.getElementById('schedOld').checked = true; 
-        renderScheduleCards('舊生');
-    } else {
-        filterGroup.style.setProperty('display', 'none', 'important');
-        renderScheduleCards('ALL'); 
-    }
-    infoModal.show();
-  }
-
-  function renderScheduleCards(filterTarget) {
-    const container = document.getElementById("infoModalBody"); 
-    if(!currentSchedulesForModal || currentSchedulesForModal.length === 0) { 
-        container.innerHTML = '<div class="text-center text-muted py-4 w-100">本學期尚無選課公告</div>'; 
-        return; 
-    }
-    
-    const now = new Date(); 
-    let html = "";
-    
-    currentSchedulesForModal.forEach(item => {
-      let target = item.target || '全部';
-      
-      if (filterTarget !== 'ALL' && target !== '全部') {
-          if (target === '新生' && (filterTarget === '大學部新生' || filterTarget === '碩博班新生')) {
-          } else if (!target.includes(filterTarget)) {
-              return; 
-          }
-      }
-
-      let startTime = new Date(item.startISO); 
-      let endTime = new Date(item.endISO); 
-      let statusClass = "", badgeHtml = "";
-      
-      let validThemes = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'dark'];
-      let safeTheme = validThemes.includes(item.theme) ? item.theme : 'primary';
-      let themeColor = `var(--bs-${safeTheme})`;
-
-      if (now >= startTime && now <= endTime) { 
-          statusClass = "active"; 
-          badgeHtml = `<span class="badge bg-${safeTheme} float-end small fw-bold">進行中</span>`; 
-      } else if (now > endTime) { 
-          statusClass = "past"; 
-          badgeHtml = '<span class="badge bg-secondary float-end small fw-bold">已結束</span>'; 
-      } else {
-          badgeHtml = '<span class="badge bg-light text-secondary border float-end small fw-bold">未開始</span>';
-      }
-      
-      let stepsHtml = '<ul class="step-list">'; 
-      item.steps.split('\n').forEach(step => { 
-          let cleanStep = step.replace(/^[\d\.\-•、\s]+/, '');
-          if(cleanStep) {
-              stepsHtml += `<li class="step-item"><i class="bi bi-dot text-${safeTheme}"></i> ${cleanStep}</li>`; 
-          }
-      }); 
-      stepsHtml += '</ul>';
-      
-      html += `
-        <div class="timeline-item ${statusClass}" style="--item-theme: ${themeColor};">
-          <div class="timeline-content shadow-sm" style="${statusClass === 'active' ? `border-color: ${themeColor};` : ''}">
-            ${badgeHtml}
-            <h6 class="fw-bold text-dark mb-1 fs-5" style="padding-right: 70px;">${item.title}</h6>
-            <div class="small text-muted fw-bold mb-2"><i class="bi bi-clock"></i> ${item.dateRange}</div>
-            ${stepsHtml}
-          </div>
-        </div>`;
-    });
-    
-    if (html === "") {
-        container.innerHTML = `<div class="text-center text-muted py-4 w-100">查無符合條件的選課時程</div>`;
-    } else {
-        container.innerHTML = html; 
-    }
-  }
-</script>
+<script src="app.js"></script>
 
 </body>
 </html>
